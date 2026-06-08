@@ -1,0 +1,4 @@
+interface:
+  display_name: "ThingLinks IoT Platform Development"
+  short_description: "Develop on the ThingLinks IoT platform: rule scripts, uplink handlers, protocol envelope, downlink commands"
+  default_prompt: "Help me develop on the ThingLinks IoT platform"

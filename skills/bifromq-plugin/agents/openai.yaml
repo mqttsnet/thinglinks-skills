@@ -1,0 +1,4 @@
+interface:
+  display_name: "ThingLinks BifroMQ Plugins"
+  short_description: "Develop bifromq-plugin-pro: BifroMQ auth/ACL, event collector (Kafka), setting & resource plugins"
+  default_prompt: "Help me work on the ThingLinks BifroMQ broker plugins"
