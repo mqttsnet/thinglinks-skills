@@ -37,6 +37,24 @@
 - 优先复用已有组件(见 `ui-components.md`),不重复造。
 - **分段切换**(手动/按设备、报文类型这类二选一)用 `<a-radio-group :options option-type="button">`(数据驱动、单组件),**别堆** `<a-radio-button>` 子组件 —— 单组件渲染更稳、更易维护(WS/MQTT 调试页实践)。
 
+## ⚠️ AntD 全局注册 tree-shaking 坑(dev 正常、生产**构建**才丢组件)
+
+项目用 `main.ts` 的 `app.use(Antd)` **全局注册**(无 unplugin 自动引入)。**只在模板里用 `<a-xxx>`、且全项目从没在"入口可达处"按名 `import { Xxx } from 'ant-design-vue'` 的组件,会被生产构建 tree-shaking 掉** → 运行时 `resolveComponent("a-xxx")` 失败 → **退化成原生元素**(忽略 props/slots:如 `a-card` 的 `title`/`#extra` 整个头部不渲染、`a-typography-*` 失效)。
+
+- **dev 不暴露**:Vite 用 esbuild 预打包 antd,不做这种摇树 → 本地一切正常,**只有生产构建/部署才丢**(排查时务必用生产产物,别只看 dev)。
+- 已踩中的:`Card`(`a-card` 头部/`#extra` 消失)、`Typography`(`a-typography-paragraph`)。注意:在懒加载页里按名 import 也救不了——只本地用、不等于全局注册。
+- **修复**:在 `main.ts` 入口**按名 import + 显式 `app.use()`**:
+  ```ts
+  import Antd, { Card, Typography } from 'ant-design-vue';
+  app.use(Antd).use(Card).use(Typography); // 防止只在模板用的组件被摇掉
+  ```
+- **自查**(在部署产物的页面 Console 跑):
+  ```js
+  const c = document.querySelector('#app').__vue_app__._context.components;
+  ['ACard','ATypography'].filter(n => !(n in c)); // 非空 = 这些组件没注册 = 会退化成原生元素
+  ```
+  把页面用到的全部 `A` 前缀组件名列进去,**空数组才安全**。
+
 ## 4. 代码风格(ESLint + Prettier + Stylelint 强制)
 
 | 维度 | 规则 |

@@ -30,6 +30,7 @@ description: >
 - 权限点匹配是**通配符**(`module:sub:action` / `module:*:action` / `*`);用 `v-hasPermission` 指令或 `usePermission().hasPermission`。
 - codemirror 的 `EditorView` 从 **`codemirror`** meta 包导入(**不要** `@codemirror/view`,未 hoist);换行 `EditorView.lineWrapping`。
 - API 统一返回 `{ code, message, data, timestamp }`,拦截器在 `utils/http/axios/axiosTransform.ts`。
+- **AntD 全局注册 + tree-shaking 坑**:只在模板用 `<a-xxx>`、没在入口按名 import 的 antd 组件,**生产构建**会被摇掉 → 运行时退化成原生元素(`a-card` 头部/`#extra` 整块消失等);**dev 正常、只生产构建/部署才丢**。`main.ts` 需显式 `app.use(Card).use(Typography)`(详见 `references/conventions.md`)。
 - 组件/路径/约定随版本演进,核对真实代码。
 
 ## References Index
