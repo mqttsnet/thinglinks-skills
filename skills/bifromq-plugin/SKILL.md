@@ -51,3 +51,16 @@ description: >
 | [references/event-collector.md](references/event-collector.md) | `IEventCollector`:report→EventType→Kafka topic、`EventTypeEnum` 映射 | 改事件采集 / Kafka topic / 新增事件 |
 | [references/setting-throttler.md](references/setting-throttler.md) | `ISettingProvider` + `IResourceThrottler` + `-D` 开关 | 改运行时配置 / 限流 |
 | [references/deploy-config.md](references/deploy-config.md) | 构建打包、config.yaml、装进 BifroMQ(standalone.yml FQN) | 部署 / 配置 |
+
+## Assets
+
+`assets/standalone-register.yml` — BifroMQ `standalone.yml` 四插件 FQN 注册 + `-Dsetting_provide_init_value=true` 提示(复制即用)。
+
+## 相关 skill
+
+- **[`thinglinks-cloud`](../thinglinks-cloud/)** — mqs 消费本插件采集的事件(连接/断开/上行),下行经 broker 投递。
+- **[`thinglinks-util`](../thinglinks-util/)** — ACL 复用 `MqttTopicMatcher`;事件因果时钟对应 `HybridLogicalClockUtil`。
+
+---
+
+> 📌 **最后核对**:`bifromq-plugin-pro`(BifroMQ 3.3.5)· 2026-06-08。类名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。

@@ -43,3 +43,15 @@ description: >
 | [references/ui-components.md](references/ui-components.md) | Vben BasicForm/Table/Modal + useForm/useTable/useModal、ApiSelect、CodeEditor、ECharts、IoT 共享组件 | 找组件/表单/表格/弹窗 |
 | [references/iot-pages.md](references/iot-pages.md) | `src/views/iot` 模块地图(link/rule/mqs)+ 对应 api/组件 | 在某 IoT 域加页面 |
 | [references/rule-script-debug.md](references/rule-script-debug.md) | `ScriptDebugPanel` props、`transformDebug` API 字段、codemirror、设备选择器 | 改规则脚本调试面板 |
+
+## Assets
+
+`assets/page-scaffold.md` — 标准 IoT 列表+编辑页脚手架(api / `data.tsx` / `index.vue`,复制改名即用)。
+
+## 相关 skill
+
+- **[`thinglinks-cloud`](../thinglinks-cloud/)** — 前端调用的后端:上行/下行链路、规则脚本契约、物模型、设备影子。
+
+---
+
+> 📌 **最后核对**:`thinglinks-web-pro` · 2026-06-08。组件/路径/约定随版本演进,落地前请核对真实代码。

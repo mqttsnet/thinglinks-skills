@@ -43,6 +43,16 @@
 
 > ACL 用的是 link-biz 自己的 `AclMatcherUtil`(带优先级+Caffeine 缓存),不是这个;桥接/通用匹配才用 `MqttTopicMatcher`。
 
+## HybridLogicalClockUtil(`utils`)— 混合逻辑时钟(HLC)
+
+`public static long nextHlc()`,产出**严格单调递增**的 long,用作分布式事件的**因果排序键**(event-time LWW CAS 单调写),跨异步消费 / 乱序 / 抖动重连都保序。
+
+- **编码**:`(物理毫秒 << 16) | 16 位逻辑计数器`(高 48 位毫秒 + 低 16 位计数器)。同一毫秒内多次调用靠低 16 位 `+1` 严格递增;物理时间推进则刷新高位、计数器归零;**时钟回拨**也靠 `+1` 续单调(绝不退步)。
+- 线程安全:单个 `AtomicLong` + CAS 自旋,无锁。
+- ⚠️ **严禁当时间戳**写入 datetime / 时序索引 —— 它不是毫秒值。要毫秒用 `System.currentTimeMillis()`;HLC **只用来比大小排因果**。
+
+> 谁在用:cloud 上行事件 `BaseEvent.eventHlc = HybridLogicalClockUtil.nextHlc()`(因果序);broker 侧对应 BifroMQ 的 `event.hlc()`(见 `bifromq-plugin` skill)—— 二者都是"**先同步抓因果时钟,再异步处理**"。
+
 ## 其它常用
 
 | 类 | 包 | 用途 |

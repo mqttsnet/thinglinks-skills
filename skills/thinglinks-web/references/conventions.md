@@ -35,6 +35,7 @@
 - **全局共享** → `src/components/`(通用)/ `src/components/iot/`(IoT 业务);PascalCase;`withInstall` 包装(`index.ts` 导出 + `src/Component.vue`)。
 - **页面局部** → 页面目录下 `components/` 或同级 `.vue`。
 - 优先复用已有组件(见 `ui-components.md`),不重复造。
+- **分段切换**(手动/按设备、报文类型这类二选一)用 `<a-radio-group :options option-type="button">`(数据驱动、单组件),**别堆** `<a-radio-button>` 子组件 —— 单组件渲染更稳、更易维护(WS/MQTT 调试页实践)。
 
 ## 4. 代码风格(ESLint + Prettier + Stylelint 强制)
 
@@ -60,6 +61,6 @@
 - **色系**:`src/settings/designSetting.ts` 的 `APP_PRESET_COLOR_LIST`(`#0960bd` 蓝 / `#009688` 绿 / `#8165FF` 紫 / `#ff5c93` / `#ee4f12` …);徽标如 `PropertyMethodBadge`(R 蓝 / W 橙 / RW 紫 / 未知灰)。
 - **卡片结构类**:模态内用 `.flexy-header` / `.flexy-body` / `.flexy-card` 命名空间(参考 `views/iot/link/product/detail/PublishModal.vue`)。
 - ⚠️ **Flexy 弹窗 CSS 常故意非 scoped**:因为 BasicModal `teleport` 到 body,scoped 选择器命中不到 → 用带 `.publish-flexy-wrap` 等命名空间的全局样式(组件内有注释说明)。
-- 参考实现:`product/detail`(header / PublishModal / modelDefinition / publishRecord)、`video/dashboard/stats`、`components/iot/svg`、`PropertyMethodBadge`。
+- 参考实现:`product/detail`(header / PublishModal / modelDefinition / publishRecord)、`video/dashboard/stats`、`components/iot/svg`、`PropertyMethodBadge`、`link/operationMaintenance/debug`(WS/MQTT 调试:全宽分段切换 + 高亮设备区块 + 状态圆点 chip)。
 
 > 新做仪表盘/详情/发布类页面,优先沿用 Flexy 卡片 + tone 色系,与既有页面观感一致。

@@ -28,7 +28,7 @@ const [registerModal, { openModal, closeModal }] = useModal();
 
 | 组件 | 用途 |
 | --- | --- |
-| `IotProductPicker` / `IotDevicePicker` | 选产品 / 选该产品下设备(无产品自动禁用)→ 标准"选产品→选设备" |
+| `IotProductPicker` / `IotDevicePicker`(`components/iot/IotProductDevicePicker`) | 选产品 / 选该产品下设备(无产品自动禁用)→ 标准"选产品→选设备";用于 ACL 设备级规则、WS/MQTT 调试页"按设备"模式(选中自动回填 clientId/账号 或拼命令 topic) |
 | `ProductTopicPicker`(+ Modal) | 主题模式选择(基础 + 自定义双模式) |
 | `ScriptDebugPanel` | 规则脚本在线调试面板(见 `rule-script-debug.md`) |
 | `ScriptTemplatePicker` | 脚本模板/骨架选择 |

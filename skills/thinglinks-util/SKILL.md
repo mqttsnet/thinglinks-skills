@@ -38,6 +38,7 @@ description: >
 - `LampJacksonModule` 把 **`Long.class` / `Long.TYPE` / BigInteger / BigDecimal 全局序列化成 String**(防 JS 精度丢失)—— 这是"规则脚本 payload 必须 `JSON.toJSONString`"的根因。
 - `MqttTopicMatcher`:`#` 匹配一切、`/#` 须前导 `/`、`#` 须在末尾、blank pattern 放行、blank topic 不匹配。
 - 加解密统一 **CBC + PKCS5Padding**,密文走 **HEX**;密钥/IV 16/24/32 字节。
+- `HybridLogicalClockUtil.nextHlc()` 是**因果排序键**(`物理ms<<16 | 16位计数器`),严格单调;**不是时间戳**,别写进 datetime/时序索引。
 - 类名/方法签名随版本演进,核对真实代码 `com.mqttsnet.basic.*`。
 
 ## References Index
@@ -46,4 +47,13 @@ description: >
 | --- | --- | --- |
 | [references/protocol-codec.md](references/protocol-codec.md) | `ProtocolMessageAdapter`、`encryptMessage`/`decryptMessage`、cipherFlag、dataSign、Sm4/Aes、DTO | 编/解协议信封,改加解密/签名 |
 | [references/groovy-engine.md](references/groovy-engine.md) | `EngineExecutor`、`ExecuteParams` 绑定、`GroovyCompiler`、`ScriptRegistry` 缓存、结果/状态 | 改脚本引擎、绑定变量、热加载 |
-| [references/core-utils.md](references/core-utils.md) | `SnowflakeIdUtil`、`LampJacksonModule`、`MqttTopicMatcher`、`TopicPlaceholders`、`DateUtils`、`JsonUtil`、crypto | 用/改 core 工具类 |
+| [references/core-utils.md](references/core-utils.md) | `SnowflakeIdUtil`、`LampJacksonModule`、`MqttTopicMatcher`、`HybridLogicalClockUtil`(HLC)、`TopicPlaceholders`、`DateUtils`、`JsonUtil`、crypto | 用/改 core 工具类 |
+
+## 相关 skill
+
+- **[`thinglinks-cloud`](../thinglinks-cloud/)** — 这些工具的**业务落地**(信封 head/dataBody、规则脚本 payload 坑、下行单次序列化、HLC 事件因果序)。
+- **[`bifromq-plugin`](../bifromq-plugin/)** — ACL 复用 `MqttTopicMatcher`,事件侧用 `event.hlc()`(对应本 skill 的 `HybridLogicalClockUtil`)。
+
+---
+
+> 📌 **最后核对**:`thinglinks-util-pro` · 2026-06-08。类名/方法签名随版本演进,落地前请核对真实代码 `com.mqttsnet.basic.*`。

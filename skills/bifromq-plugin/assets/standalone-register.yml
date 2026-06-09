@@ -1,0 +1,15 @@
+# BifroMQ standalone.yml —— 注册 ThingLinks 四插件(BifroMQ 3.3.5,com.baidu.bifromq.*)
+#
+# 步骤:① mvn clean package -DskipTests 出 4 个插件 zip → 解压到 BifroMQ plugins/
+#       ② 在 standalone.yml 配下面的 FQN  ③ 重启 BifroMQ
+#
+# ⚠️ bin/bifromq-start.sh 启动参数必须加:  -Dsetting_provide_init_value=true
+#    否则 setting-provider 全失效 + PING_REQ 心跳采集不到。
+
+authProviderFQN: com.mqttsnet.thinglinks.BifromqAuthProviderPluginAuthProvider
+settingProviderFQN: com.mqttsnet.thinglinks.BifromqSettingProviderPluginSettingProvider
+resourceThrottlerFQN: com.mqttsnet.thinglinks.BifromqResourceThrottlerPluginResourceThrottlerProvider
+# event-collector:按 BifroMQ 的 eventCollector 配置项接入(见 references/deploy-config.md 与 event 插件 README)
+
+# 各插件 conf/config.yaml 另配(auth 的 baseUrl/endpoint、event 的 kafka bootstrapServers 等),
+# 详见 references/deploy-config.md。升 BifroMQ 4.0 需把包名换成 org.apache.bifromq.*。
