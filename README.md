@@ -11,7 +11,7 @@ Structured, on-demand knowledge packs that turn any AI agent (Claude Code · Cod
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
-**English** · [简体中文](./README.zh-CN.md)
+**English** · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md)
 
 </div>
 
@@ -27,7 +27,7 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 
 | Skill | Repository | What it helps you do |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud business platform — `broker` / `mqs` / `rule` / `link` / `public` | Groovy uplink **rule scripts**, **protocol envelope**, custom **TopicHandler**, **downlink commands**, **thing-model**, device/product **cache**, **TDengine + device shadow**, **ACL / topic** matching, **bus extension points**, **troubleshooting**. |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink (`DeviceDownlinkFacade`), thing-model, cache, TDengine + shadow, ACL, WS broadcast, bus extension points. *System:* WebFlux gateway (Sa-Token), oauth, system/base, boot/cloud Facade duality, DATASOURCE_COLUMN multi-tenant. *Video:* GB28181 streaming (ZLMediaKit). |
 | [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | Protocol **codec** (SM4/AES/SHA256 sign), the **Groovy engine** (executor / binding / compile cache), **core utils** (SnowflakeId, LampJackson `Long→String`, MqttTopicMatcher, crypto). |
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT **pages** (device / product / rule / debug / ACL), **API layer** (defHttp), **routing + permission**, Vben + IoT **components**, the rule-script **debug panel**, **conventions** (file placement / Flexy design), **i18n**. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | BifroMQ **auth + ACL** (`IAuthProvider`), **event collector** (`IEventCollector` → Kafka), **setting** & **resource-throttler** providers, the `EventTypeEnum ↔ DeviceActionTypeEnum` mapping, plugin **deployment**. |
@@ -44,7 +44,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 ```
 
-Once installed, a skill **auto-triggers** in your agent when relevant — e.g. when you mention ThingLinks, 规则脚本 (rule scripts), 设备上行/下行 (device uplink/downlink), 物模型 (thing-model), 设备影子 (device shadow), BifroMQ auth/ACL, or the `mqs` / `rule` / `link` / `broker` modules.
+Once installed, a skill **auto-triggers** in your agent when relevant — e.g. when you mention ThingLinks, 规则脚本 (rule scripts), 设备上行/下行 (device uplink/downlink), 物模型 (thing-model), 设备影子 (device shadow), 网关/鉴权/多租户 (gateway/auth/multi-tenant), 流媒体/GB28181 (video), BifroMQ auth/ACL, or the `gateway` / `oauth` / `system` / `mqs` / `rule` / `link` / `broker` / `video` modules.
 
 ## 🧱 How a skill is built
 
@@ -56,7 +56,7 @@ Once installed, a skill **auto-triggers** in your agent when relevant — e.g. w
 └── agents/openai.yaml# cross-tool interface (Codex / OpenAI agents)
 ```
 
-- `thinglinks-cloud` — 12 references + 3 Groovy rule-script skeletons
+- `thinglinks-cloud` — 20 references across **`system/` · `iot/` · `video/`** (incl. `iot/device-access` + `iot/testing` for simulation/testing) + 3 Groovy skeletons + Mermaid diagrams
 - `thinglinks-util` — 3 references (`protocol-codec` / `groovy-engine` / `core-utils`)
 - `thinglinks-web` — 7 references (structure / api / routing-permission / **conventions** / ui-components / iot-pages / rule-script-debug)
 - `bifromq-plugin` — 4 references (`auth-acl` / `event-collector` / `setting-throttler` / `deploy-config`)

@@ -11,7 +11,7 @@
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
-[English](./README.md) · **简体中文**
+[English](./README.md) · **简体中文** · [日本語](./README.ja.md) · [한국어](./README.ko.md)
 
 </div>
 
@@ -27,7 +27,7 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 
 | Skill | 对应仓库 | 帮你做什么 |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云端业务平台 —— `broker` / `mqs` / `rule` / `link` / `public` | Groovy 上行**规则脚本**、**协议信封**、自定义 **TopicHandler**、**下行命令**、**物模型**、设备/产品**缓存**、**TDengine + 设备影子**、**ACL / 主题**匹配、**bus 扩展点**、**排查**。 |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云平台 —— **系统基础** / **IoT** / **流媒体** | **三域。** *IoT:* 规则脚本、协议信封、TopicHandler、下行(`DeviceDownlinkFacade`)、物模型、缓存、TDengine+影子、ACL、WS 广播、bus 扩展点。*系统基础:* WebFlux 网关(Sa-Token)、oauth、system/base、boot/cloud Facade 双实现、DATASOURCE_COLUMN 多租户。*流媒体:* GB28181(ZLMediaKit)。 |
 | [`thinglinks-util`](./skills/thinglinks-util/) | 框架底座 —— `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | 协议**编解码**(SM4/AES/SHA256 签名)、**Groovy 引擎**(执行器/绑定/编译缓存)、**core 工具**(SnowflakeId、LampJackson `Long→String`、MqttTopicMatcher、加解密)。 |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT **页面**(设备/产品/规则/调试/ACL)、**API 层**(defHttp)、**路由 + 权限**、Vben + IoT **组件**、规则脚本**调试面板**、**开发准则**(按域放文件 / Flexy 风格)、**i18n**。 |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker 插件 —— `bifromq-plugin-pro` | BifroMQ **认证 + ACL**(`IAuthProvider`)、**事件采集**(`IEventCollector` → Kafka)、**配置/限流** provider、`EventTypeEnum ↔ DeviceActionTypeEnum` 映射、插件**部署**。 |
@@ -44,7 +44,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 ```
 
-装完后,Agent 会在相关场景**自动触发** —— 比如你提到 ThingLinks、规则脚本、设备上行/下行、物模型、设备影子、BifroMQ 认证/ACL,或 `mqs` / `rule` / `link` / `broker` 模块时。
+装完后,Agent 会在相关场景**自动触发** —— 比如你提到 ThingLinks、规则脚本、设备上行/下行、物模型、设备影子、网关/鉴权/多租户、流媒体/GB28181、BifroMQ 认证/ACL,或 `gateway`/`oauth`/`system`/`mqs`/`rule`/`link`/`broker`/`video` 模块时。
 
 ## 🧱 skill 怎么搭
 
@@ -56,7 +56,7 @@ npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 └── agents/openai.yaml# 跨工具接口(Codex / OpenAI)
 ```
 
-- `thinglinks-cloud` —— 12 篇 references + 3 个 Groovy 规则脚本骨架
+- `thinglinks-cloud` —— 20 篇 references(**`system/` · `iot/` · `video/`**,含 `iot/device-access` + `iot/testing` 供模拟/测试)+ 3 个 Groovy 骨架 + Mermaid 架构图
 - `thinglinks-util` —— 3 篇 references(`protocol-codec` / `groovy-engine` / `core-utils`)
 - `thinglinks-web` —— 7 篇 references(结构 / api / 路由权限 / **开发准则** / 组件 / 页面地图 / 脚本调试)
 - `bifromq-plugin` —— 4 篇 references(`auth-acl` / `event-collector` / `setting-throttler` / `deploy-config`)

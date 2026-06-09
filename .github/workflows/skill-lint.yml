@@ -1,0 +1,21 @@
+name: skill-lint
+
+# Validate skill structure on every push / PR:
+# frontmatter (name + trigger description) and References Index integrity
+# (no dangling links, no orphan reference files).
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate skills (frontmatter + References Index)
+        run: node scripts/validate.mjs
