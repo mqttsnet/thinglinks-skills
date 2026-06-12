@@ -31,6 +31,7 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 | [`thinglinks-util`](./skills/thinglinks-util/) | 框架底座 —— `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | 协议**编解码**(SM4/AES/SHA256 签名)、**Groovy 引擎**(执行器/绑定/编译缓存)、**core 工具**(SnowflakeId、LampJackson `Long→String`、MqttTopicMatcher、加解密)。 |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT **页面**(设备/产品/规则/调试/ACL)、**API 层**(defHttp)、**路由 + 权限**、Vben + IoT **组件**、规则脚本**调试面板**、**开发准则**(按域放文件 / Flexy 风格)、**i18n**。 |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker 插件 —— `bifromq-plugin-pro` | BifroMQ **认证 + ACL**(`IAuthProvider`)、**事件采集**(`IEventCollector` → Kafka)、**配置/限流** provider、`EventTypeEnum ↔ DeviceActionTypeEnum` 映射、插件**部署**。 |
+| [`thinglinks-workspace`](./skills/thinglinks-workspace/) | 工作区结构 —— 社区 monorepo ↔ 旗舰独立仓 | **仓库与路径定位。** 工程映射(cloud / web / bifromq-plugin / util)、治理文件归口、独立**版本线** + `bump-version.sh`、`changelogs/` 每版一文件、Nacos 模板**占位符规则**、永不提交清单、提交风格、**安全基线**(硬性指标检查表)。 |
 
 ## 🚀 安装
 
@@ -42,6 +43,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-cloud -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
 ```
 
 装完后,Agent 会在相关场景**自动触发** —— 比如你提到 ThingLinks、规则脚本、设备上行/下行、物模型、设备影子、网关/鉴权/多租户、流媒体/GB28181、BifroMQ 认证/ACL,或 `gateway`/`oauth`/`system`/`mqs`/`rule`/`link`/`broker`/`video` 模块时。
@@ -60,6 +62,7 @@ npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 - `thinglinks-util` —— 3 篇 references(`protocol-codec` / `groovy-engine` / `core-utils`)
 - `thinglinks-web` —— 7 篇 references(结构 / api / 路由权限 / **开发准则** / 组件 / 页面地图 / 脚本调试)
 - `bifromq-plugin` —— 4 篇 references(`auth-acl` / `event-collector` / `setting-throttler` / `deploy-config`)
+- `thinglinks-workspace` —— 1 篇 reference(`security-baseline` 安全硬性指标)
 
 ## 🏷️ 命名规范
 

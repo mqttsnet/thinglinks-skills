@@ -15,6 +15,8 @@ description: >
 
 # BifroMQ Plugin (broker plugins)
 
+> 适用两条产品线:旗舰仓 `bifromq-plugin-pro` 与社区 monorepo 子目录 `thinglinks/bifromq-plugin`(代码同构)。仓库映射见 `thinglinks-workspace`。
+
 `bifromq-plugin-pro`:ThingLinks 给 **BifroMQ**(MQTT broker)写的插件库。Maven + Java 17,BifroMQ **3.3.5**(包 `com.baidu.bifromq.*`;升 4.0 要换成 `org.apache.bifromq.*`)。包名 `com.mqttsnet.thinglinks`。
 
 ## 四个插件(各实现一个 BifroMQ SPI)
@@ -63,4 +65,4 @@ description: >
 
 ---
 
-> 📌 **最后核对**:`bifromq-plugin-pro`(BifroMQ 3.3.5)· 2026-06-08。类名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
+> 📌 **最后核对**:`bifromq-plugin-pro`(BifroMQ 3.3.5)· 2026-06-12(两线同构)。类名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。

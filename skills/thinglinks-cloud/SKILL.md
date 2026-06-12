@@ -17,6 +17,8 @@ description: >
 
 # ThingLinks Cloud Platform Development
 
+> 适用两条产品线:旗舰仓 `thinglinks-cloud-pro-datasource-column` 与社区 monorepo 子目录 `thinglinks/thinglinks-cloud`(代码同构)。仓库映射见 `thinglinks-workspace`。
+
 ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa-Token)+ BifroMQ(MQTT broker)+ Kafka/RocketMQ + TDengine + Redis + Nacos + Vue3**。包名 `com.mqttsnet.thinglinks`。**三大应用域:系统基础 / 物联网 IoT / 流媒体 video**,references 按域分目录。
 
 ## 模块速览(按域)
@@ -78,7 +80,9 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 ### 流媒体 video
 | File | Content | When to read |
 | --- | --- | --- |
-| [video/video.md](references/video/video.md) | GB28181 平台:ZLM/ABL 对接 + 钩子、点播/回放/PTZ 流程、独立部署、不走 MQTT 总线 | 改视频/流媒体 |
+| [video/video.md](references/video/video.md) | 总览:**biz-protocol 模块拆分**、域地图、表/缓存基线、点播流程、部署与多租户结论 | 视频域上手/找东西放哪 |
+| [video/gb28181.md](references/video/gb28181.md) | 信令层:transmit 管线、**信令事件体系(38 类)**、cmd、SSRC/会话、级联、Gb2016/2022 适配 | 改信令处理/加联动 listener |
+| [video/media-access.md](references/video/media-access.md) | ZLM hook 事件面、stream/record 域、**ISUP / JT1078** 接入、VendorProtocolAdapter、ONVIF | 接媒体回调/新协议/新厂商 |
 
 ### 通用
 | File | Content | When to read |
@@ -114,4 +118,4 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ---
 
-> 📌 **最后核对**:`thinglinks-cloud-pro` @ `feature/2026.05-feature-syncCode` · 2026-06-08。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
+> 📌 **最后核对**:`thinglinks-cloud-pro` · 2026-06-12(两线同构)。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。

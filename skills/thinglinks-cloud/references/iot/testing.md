@@ -43,3 +43,7 @@
 - `issueCommands` 构的是**加密信封**(SM4/AES+SHA256,取设备缓存密钥),设备须存在于 `LinkCacheDataHelper` 缓存,否则报 "Device does not exist!"。
 - `sendMqttCustomMessage`(直发 broker,不路由) vs `dispatch`(协议路由,`issueCommands` 内部用)—— 别混。
 - 端点为 controller 相对路径,经网关加模块前缀;类名/行号随版本演进,核对真实代码 `com.mqttsnet.thinglinks.*`。
+
+## 北向桥接验证
+
+桥接规则执行有**落库轨迹**:`rule_bridge_execution_trace` / `rule_bridge_execution_step`(按 `(traceId, ruleId)` 唯一,MQ 重投被拦截)——验证桥接是否生效查这两表;控制台"集成桥接"看板有执行统计与日志回显。

@@ -31,6 +31,7 @@ Agent Skills 는 특정 도메인에 대한 **깊고 온디맨드한 컨텍스�
 | [`thinglinks-util`](./skills/thinglinks-util/) | 프레임워크 기반 — `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | 프로토콜 **코덱**(SM4/AES/SHA256 서명), **Groovy 엔진**, **코어 유틸**(SnowflakeId, LampJackson `Long→String`, MqttTopicMatcher, HLC, 암호). |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 프론트 콘솔 — Vue3 + Vben | IoT **페이지**, **API 레이어**(defHttp), **라우팅 + 권한**, Vben + IoT **컴포넌트**, 룰 스크립트 **디버그 패널**, **컨벤션**(파일 배치 / Flexy 디자인), **i18n**. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ 브로커 플러그인 — `bifromq-plugin-pro` | BifroMQ **인증 + ACL**(`IAuthProvider`), **이벤트 컬렉터**(`IEventCollector` → Kafka), **setting** & **resource-throttler**, `EventTypeEnum ↔ DeviceActionTypeEnum` 매핑, 플러그인 **배포**. |
+| [`thinglinks-workspace`](./skills/thinglinks-workspace/) | 워크스페이스 구조 — Community monorepo ↔ Enterprise 리포지토리 | **리포지토리/경로 탐색.** 리포지토리 매핑, 거버넌스 파일 배치, 독립 **버전 라인** + `bump-version.sh`, `changelogs/` 방식, Nacos 템플릿 **플레이스홀더 규칙**, 커밋 금지 파일, 커밋 규약, **보안 베이스라인**(필수 체크리스트). |
 
 ## 🚀 설치
 
@@ -42,6 +43,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-cloud -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
 ```
 
 설치 후, 관련 주제(ThingLinks, 규칙 스크립트, 디바이스 업/다운링크, 사물 모델, 디바이스 섀도우, BifroMQ auth/ACL, `mqs` / `rule` / `link` / `broker` 모듈 등)를 언급하면 skill 이 **자동 트리거** 됩니다.

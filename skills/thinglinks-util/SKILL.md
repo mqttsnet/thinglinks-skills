@@ -5,7 +5,7 @@ description: >
   (com.mqttsnet.basic): the protocol-starter (ProtocolMessageAdapter / envelope encode
   & decode / SM4 & AES encryption / SHA256 dataSign / EncryptionDetailsDTO), the
   groovy-engine-starter (EngineExecutor / ExecuteParams binding / GroovyCompiler /
-  ScriptRegistry hot-reload cache), or thinglinks-core utilities (SnowflakeIdUtil,
+  ScriptRegistry hot-reload cache), the kafka-starter (KafkaProducerService keyed send / transaction policy / DLT consumer), the databridge-starter (Sink/Source/Serializer SPI for bridge rules), or thinglinks-core utilities (SnowflakeIdUtil,
   LampJacksonModule Long-to-String serialization, MqttTopicMatcher, TopicPlaceholders,
   DateUtils, JsonUtil, Sm3/Sm4/AES crypto). Trigger whenever the user touches the protocol
   envelope codec, the Groovy script engine internals, or shared util classes — especially
@@ -13,6 +13,8 @@ description: >
 ---
 
 # ThingLinks Util (framework foundation)
+
+> 适用两条产品线:旗舰仓 `thinglinks-util-pro`;社区线以 Maven 依赖消费同版工件(`thinglinks-util.version` 锚定)。仓库映射见 `thinglinks-workspace`。
 
 `thinglinks-util-pro` 是被各业务模块依赖的**独立框架仓**,包名 `com.mqttsnet.basic`。改动是**全局行为**,影响所有下游(cloud 的 broker/mqs/rule/link 都依赖它)。
 
@@ -48,6 +50,8 @@ description: >
 | [references/protocol-codec.md](references/protocol-codec.md) | `ProtocolMessageAdapter`、`encryptMessage`/`decryptMessage`、cipherFlag、dataSign、Sm4/Aes、DTO | 编/解协议信封,改加解密/签名 |
 | [references/groovy-engine.md](references/groovy-engine.md) | `EngineExecutor`、`ExecuteParams` 绑定、`GroovyCompiler`、`ScriptRegistry` 缓存、结果/状态 | 改脚本引擎、绑定变量、热加载 |
 | [references/core-utils.md](references/core-utils.md) | `SnowflakeIdUtil`、`LampJacksonModule`、`MqttTopicMatcher`、`HybridLogicalClockUtil`(HLC)、`TopicPlaceholders`、`DateUtils`、`JsonUtil`、crypto | 用/改 core 工具类 |
+| [references/kafka-starter.md](references/kafka-starter.md) | 生产/消费装配、带 key 发送规范、事务 opt-in 策略、`max.block.ms` 快速失败、DLT 消费基线 | 发/消费 Kafka 消息,调生产者参数 |
+| [references/databridge-starter.md](references/databridge-starter.md) | 桥接 SPI(Sink/Source/Serializer)、ConnectorRegistry 自动发现、19 Sink/3 Source 矩阵、扩展新 Sink | 桥接规则底座,新增桥接目标 |
 
 ## 相关 skill
 
@@ -56,4 +60,4 @@ description: >
 
 ---
 
-> 📌 **最后核对**:`thinglinks-util-pro` · 2026-06-08。类名/方法签名随版本演进,落地前请核对真实代码 `com.mqttsnet.basic.*`。
+> 📌 **最后核对**:`thinglinks-util-pro` · 2026-06-12。类名/方法签名随版本演进,落地前请核对真实代码 `com.mqttsnet.basic.*`。

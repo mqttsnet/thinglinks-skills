@@ -1,0 +1,4 @@
+interface:
+  display_name: "ThingLinks Workspace (repo layout & security baseline)"
+  short_description: "Locate ThingLinks repos/paths across Community & Enterprise lines; version/changelog/credential rules; security hard-requirements checklist"
+  default_prompt: "Help me locate the right ThingLinks repo/path and apply the workspace & security baseline rules"

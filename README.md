@@ -31,6 +31,7 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 | [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | Protocol **codec** (SM4/AES/SHA256 sign), the **Groovy engine** (executor / binding / compile cache), **core utils** (SnowflakeId, LampJackson `Long→String`, MqttTopicMatcher, crypto). |
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT **pages** (device / product / rule / debug / ACL), **API layer** (defHttp), **routing + permission**, Vben + IoT **components**, the rule-script **debug panel**, **conventions** (file placement / Flexy design), **i18n**. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | BifroMQ **auth + ACL** (`IAuthProvider`), **event collector** (`IEventCollector` → Kafka), **setting** & **resource-throttler** providers, the `EventTypeEnum ↔ DeviceActionTypeEnum` mapping, plugin **deployment**. |
+| [`thinglinks-workspace`](./skills/thinglinks-workspace/) | workspace layout — Community monorepo ↔ Enterprise repos | **Repo & path locator.** Repo-to-repo mapping (cloud / web / bifromq-plugin / util), governance-file placement, independent **version lines** + `bump-version.sh`, `changelogs/` per-release layout, Nacos template **placeholder rules**, never-commit local files, commit style, **security baseline** (hard-requirements checklist). |
 
 ## 🚀 Install
 
@@ -42,6 +43,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-cloud -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
 ```
 
 Once installed, a skill **auto-triggers** in your agent when relevant — e.g. when you mention ThingLinks, 规则脚本 (rule scripts), 设备上行/下行 (device uplink/downlink), 物模型 (thing-model), 设备影子 (device shadow), 网关/鉴权/多租户 (gateway/auth/multi-tenant), 流媒体/GB28181 (video), BifroMQ auth/ACL, or the `gateway` / `oauth` / `system` / `mqs` / `rule` / `link` / `broker` / `video` modules.
@@ -60,6 +62,7 @@ Once installed, a skill **auto-triggers** in your agent when relevant — e.g. w
 - `thinglinks-util` — 3 references (`protocol-codec` / `groovy-engine` / `core-utils`)
 - `thinglinks-web` — 7 references (structure / api / routing-permission / **conventions** / ui-components / iot-pages / rule-script-debug)
 - `bifromq-plugin` — 4 references (`auth-acl` / `event-collector` / `setting-throttler` / `deploy-config`)
+- `thinglinks-workspace` — 1 reference (`security-baseline` hard-requirements checklist)
 
 ## 🏷️ Naming convention
 

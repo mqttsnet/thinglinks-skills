@@ -14,6 +14,8 @@ description: >
 
 # ThingLinks Web (frontend console)
 
+> 适用两条产品线:旗舰仓 `thinglinks-web-pro` 与社区 monorepo 子目录 `thinglinks/thinglinks-web`(代码同构)。仓库映射见 `thinglinks-workspace`。
+
 `thinglinks-web-pro`:**Vue 3 + Vben Admin + Ant Design Vue + Vite + TypeScript + Pinia + vue-i18n**。多租户构建(`VITE_GLOB_MULTI_TENANT_TYPE`:NONE / COLUMN / DATASOURCE_COLUMN)。
 
 ## 工作流
@@ -55,4 +57,4 @@ description: >
 
 ---
 
-> 📌 **最后核对**:`thinglinks-web-pro` · 2026-06-08。组件/路径/约定随版本演进,落地前请核对真实代码。
+> 📌 **最后核对**:`thinglinks-web-pro` · 2026-06-12(两线同构)。组件/路径/约定随版本演进,落地前请核对真实代码。

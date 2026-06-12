@@ -5,6 +5,11 @@ Notable changes to the ThingLinks skills. Format loosely follows [Keep a Changel
 ## [Unreleased]
 
 ### Added
+- `thinglinks-cloud`: video domain expanded to 3 references — `video.md` rewritten as overview (module split / domain map / table & cache baseline), new `video/gb28181.md` (signaling pipeline + 38-event system + cascade + Gb2016/2022 adapters), new `video/media-access.md` (ZLM hook events, stream/record, ISUP, JT1078, VendorProtocolAdapter, ONVIF); `iot/testing.md` gains bridge-execution verification.
+- `thinglinks-util`: new `references/kafka-starter.md` (keyed send rules, transaction opt-in policy, `max.block.ms` fast-fail, DLT consumer baseline) and `references/databridge-starter.md` (Sink/Source/Serializer SPI, ConnectorRegistry discovery, 19-sink/3-source matrix).
+- `thinglinks-web`: `iot-pages.md` — dashboard (assetStats/assetmap), product `versionOverview`, device-shadow location corrected to `device/running/`.
+- All four project skills now carry a dual-line applicability note (Enterprise repo ↔ Community monorepo sub-dir) pointing to `thinglinks-workspace`; verified-against footers refreshed to 2026-06-12.
+- **`thinglinks-workspace`** — new skill: dual-line repo/path locator (Community monorepo ↔ Enterprise repos), governance-file placement, version lines + `bump-version.sh`, `changelogs/` per-release layout, Nacos template placeholder rules, plus `references/security-baseline.md` (7-group hard-requirements checklist).
 - `thinglinks-cloud`: `references/ws-downlink-broadcast.md` — WS downlink broadcast (`WsDeviceSessionRegistry` online registry + RocketMQ `BROADCASTING` fan-out + local-first delivery + heartbeat / TTL self-heal), replacing the old `SessionOwnerRegistry` point-to-point (`ip:port`) routing.
 - `thinglinks-util`: `HybridLogicalClockUtil` (HLC) section in `references/core-utils.md` — causal-ordering key (`physicalMs << 16 | counter`), strictly monotonic, **not** a timestamp.
 - `scripts/validate.mjs` + `.github/workflows/skill-lint.yml` — CI validation of frontmatter + References Index integrity.

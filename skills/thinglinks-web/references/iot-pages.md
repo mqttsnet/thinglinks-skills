@@ -7,15 +7,16 @@ api 在 `src/api/iot/` 同构,i18n 在 `locales/lang/*/iot/`。
 ```
 views/iot/link/
 ├── product/                 产品:列表/详情/编辑/版本/发布
-├── device/                  设备:列表/详情/调试/命令执行
+├── device/                  设备:列表/详情/调试/命令执行;`running/` 运行状态(**设备影子**展示,api 在 `api/iot/link/deviceShadow`)
 ├── group/                   设备分组
 ├── productCommand/ productProperty/ productService/   物模型:命令/属性/服务定义
 ├── productCommandRequest/ productCommandResponse/     命令请求/响应记录
 ├── productTopic/            产品 Topic(基础/自定义)
 ├── productVersion/ productVersionChangeLog/ productPublishRecord/   版本/变更日志/发布记录
 ├── ota/                     OTA 升级(任务/记录)
-├── deviceShadow/            设备影子
-├── deviceLocation/ dashboard/   定位 / IoT 仪表盘
+├── deviceLocation/              设备定位
+├── dashboard/                   资产看板:assetStats(资产统计)/ assetmap(资产地图,2D/3D)
+├── product/versionOverview/     产品版本总览
 └── operationMaintenance/
     ├── debug/               设备调试:webSocket/ + mqtt/
     ├── accessControl/       ACL:deviceAclRule(Edit/detail/data.tsx)
