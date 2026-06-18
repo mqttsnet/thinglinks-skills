@@ -5,7 +5,8 @@ description: >
   Vben Admin + Ant Design Vue + Vite + TypeScript + Pinia): building IoT pages under
   src/views/iot (device / product / rule / OTA / operationMaintenance debug / accessControl),
   defining API calls with defHttp, using shared IoT components (IotProductPicker,
-  IotDevicePicker, ProductTopicPicker, ScriptDebugPanel, ScriptTemplatePicker), the rule
+  IotDevicePicker, IotProductVersionPicker, ProductTopicPicker, ScriptDebugPanel,
+  ScriptTemplatePicker, BusinessCardList 卡片列表/版本选择器), the rule
   script Groovy debug panel, Vben BasicForm/BasicTable/BasicModal with useForm/useTable/
   useModal, the CodeEditor (codemirror), menu-driven routing + v-hasPermission, adding i18n
   (zh-CN/en-US/ja), or drawing flow diagrams (Excalidraw). Trigger whenever the user works
@@ -57,4 +58,4 @@ description: >
 
 ---
 
-> 📌 **最后核对**:`thinglinks-web-pro` · 2026-06-12(两线同构)。组件/路径/约定随版本演进,落地前请核对真实代码。
+> 📌 **最后核对**:`thinglinks-web-pro` · 2026-06-18(两线同构)。组件/路径/约定随版本演进,落地前请核对真实代码。

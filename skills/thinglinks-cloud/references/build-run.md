@@ -36,6 +36,12 @@
 - Kafka topic / `BridgeMessageEnvelope` 改 → 见 `references/extension-points.md`;
 - util-pro 的 `LampJacksonModule` / `SnowflakeIdUtil` / `MqttTopicMatcher` 是全局行为,改动影响所有下游(谨慎,细节见 `thinglinks-util` skill)。
 
+## XXL-Job 调度任务(`thinglinks-iot-executor` 的 `LinkJob`)
+
+XXL-Job 执行器在 `thinglinks-support`。链路相关 handler:`flushAnyTenantDeviceCacheJobHandler` / `flushAnyTenantProductCacheJobHandler` / `flushAnyTenantProductModelCacheJobHandler`(**缓存刷新仅做预热**)、`syncAnyTenantDeviceConnectionStatusJobHandler`、`processOtaUpgradeTasksJobHandler`。
+
+> **发布重试已拆为独立调度任务**:`@XxlJob("flushProductVersionPublishRetryJobHandler")` 调 facade `LinkJobHandlerFacade.retryProductVersionPublish(tenantId)`,与缓存预热解耦(故障互不影响、周期可单独加密,建议 2~5 分钟覆盖 1h 兜底窗口)。整条记录幂等 rerun 机制见 `iot/product-version-publish.md`。
+
 ## 提交规范(本仓约定)
 
 - **不自动 commit**(改完先展示,等用户分批指令;"继续/完成"≠ commit 授权);

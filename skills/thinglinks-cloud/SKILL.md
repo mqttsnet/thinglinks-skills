@@ -5,14 +5,17 @@ description: >
   domains. (1) IoT: Groovy device-uplink rule scripts (规则脚本), the protocol envelope
   (head/dataBody/dataSign, cipherFlag), custom uplink TopicHandler, downlink commands via
   DeviceDownlinkFacade, thing-model, device/product cache, TDengine + device shadow, ACL / MQTT
-  topic matching, WS downlink broadcast, the uplink bus (DeviceEventProcessor / TopicHandler).
+  topic matching, WS downlink broadcast, the uplink bus (DeviceEventProcessor / TopicHandler),
+  产品版本发布编排 / 灰度名单 / 改绑 (publish orchestrator:FULL/CANARY/SHADOW 策略),
+  设备版本切换与分布 (switchBoundProductVersion / version distribution),
+  OTA 升级与物模型版本切换 (OtaModelVersionSwitcher).
   (2) System foundation: the reactive WebFlux gateway (Sa-Token auth, Nacos routing, Sentinel),
   oauth login/token (Sa-Token grant types), the system/base modules (Def* vs Base*), the
   boot/cloud Facade duality, and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
   created_org_id tenant line). (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
   RTP). Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
-  网关/鉴权/Sa-Token, 多租户, 流媒体/GB28181, or the gateway/oauth/system/base/broker/mqs/rule/
-  link/video modules — even without saying "ThingLinks".
+  网关/鉴权/Sa-Token, 多租户, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
+  gateway/oauth/system/base/broker/mqs/rule/link/video modules — even without saying "ThingLinks".
 ---
 
 # ThingLinks Cloud Platform Development
@@ -69,6 +72,8 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [iot/downlink-command.md](references/iot/downlink-command.md) | 下行两层(业务构造 + `DeviceDownlinkFacade` 协议派发)、buildResponse、单次序列化、OTA | 写设备下行命令 |
 | [iot/ws-downlink-broadcast.md](references/iot/ws-downlink-broadcast.md) | WS 下行广播:`WsDeviceSessionRegistry` + `BROADCASTING` 消费者 + 心跳/TTL | 改 WS 下行/多节点会话 |
 | [iot/thing-model.md](references/iot/thing-model.md) | 物模型 services/properties/datatype/enumlist、版本发布建表 | 对齐字段/类型、版本发布 |
+| [iot/product-version-publish.md](references/iot/product-version-publish.md) | 发布编排:FULL/CANARY/SHADOW 策略、灰度名单(去百分比)、整条记录幂等 rerun 重试、灰度期 previousFullVersionNo | 改发布编排/灰度/影子改绑/重试 |
+| [iot/ota.md](references/iot/ota.md) | OTA 升级包 `product_version_no` 目标版本 + `OtaModelVersionSwitcher` 双触发迁绑;设备版本切换/分布原语(switchBoundProductVersion / countDeviceVersionDistribution) | 改 OTA 切版本 / 设备改绑原语 / 版本分布 |
 | [iot/cache.md](references/iot/cache.md) | LinkCacheDataHelper / DeviceCacheVO / ProductCacheVO / productModel | handler/脚本里取缓存 |
 | [iot/device-data.md](references/iot/device-data.md) | DeviceDataProcessingService 落库:TDengine 超表/子表 + 设备影子 | 落库流程、子表排查 |
 | [iot/acl-topic-match.md](references/iot/acl-topic-match.md) | ACL 发布鉴权 + MqttTopicMatcher(`#`、前导 `/` 规则) | topic 匹配 / ACL 断连 |
@@ -118,4 +123,4 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ---
 
-> 📌 **最后核对**:`thinglinks-cloud-pro` · 2026-06-12(两线同构)。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
+> 📌 **最后核对**:`thinglinks-cloud-pro` · 2026-06-18(两线同构)。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。

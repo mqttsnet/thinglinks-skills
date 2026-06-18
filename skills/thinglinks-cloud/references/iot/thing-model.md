@@ -29,13 +29,17 @@ product
 
 ## 版本发布建表(关键:超表在发布时建,不是上报时)
 
-`ProductVersionPublishOrchestrator.runPublish`(`thinglinks-link-biz/.../productversion/publish/orchestrator`,行 122):
+`ProductVersionPublishOrchestrator.runPublish(ProductVersionLifecycleEventSource)`(`thinglinks-link-biz/.../productversion/publish/orchestrator`)。发布走"事件入口 + 定时兜底 job 共享同一份逻辑、整条记录幂等 rerun"模式(发布失败由 job 周期重跑,非按行号一次性流程),细节见 `iot/product-version-publish.md`:
 1. 反序列化 `product_version.product_snapshot_json` → ProductSnapshotVO(该版本所有 services + properties);
-2. **遍历每个 service 建 TDengine 超表**:`ProductTdsNamer.superTableName(productType, productId, versionNo, serviceCode)` → `tdsFacade.createSuperTableAndColumn`(行 141-171);
+2. **遍历每个 service 建 TDengine 超表**:`ProductTdsNamer.superTableName(productType, productId, versionNo, serviceCode)` → `tdsFacade.createSuperTableAndColumn`;
    - Schema 列:`ts`(TIMESTAMP 纳秒)+ `event_time`(TIMESTAMP)+ 每属性一列(按 propertyCode,类型由 datatype 决定);
    - Tag:`device_identification`(BINARY 64);
-   - 单 NCHAR/BINARY 字段字符数 cap 5000(防超 TDengine 65531 字节行上限);
-3. 全部 DDL 成功 → 刷物模型缓存 + 按 `publishStrategy`(FULL/CANARY)改绑设备 + 标记发布 SUCCESS。
+   - 单 NCHAR/BINARY 字段字符数 cap 5000(防超 TDengine 65531 字节行上限);超量整服务直接抛 `BizException` 带 Top-3 大字段;
+3. 全部 DDL 成功 → 刷物模型缓存 + **按发布策略改绑设备**(改绑由策略实现执行,不再内联在编排器):
+   - **FULL** → `DeviceRebindStreamer` 游标分批流式改绑(恒定内存,小事务);
+   - **CANARY** → 按设备名单 / 分组改绑(命中网关连带子设备),**无百分比**;
+   - **SHADOW** → 只预建超表、**不改绑**,靠外部 `switchBoundProductVersion` 切流；
+   再写策略执行结果快照 `canary_result_json` + 标记发布 SUCCESS。三策略与重试详见 `iot/product-version-publish.md`。
 
 > 影子/时序某服务无数据 → 多半该服务 `serviceStatus` 停用、或版本未发布(超表未建)→ 启用并重新发布版本。子表首次上报自动建(见 `references/device-data.md`)。
 

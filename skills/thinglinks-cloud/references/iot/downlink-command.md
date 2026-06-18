@@ -50,6 +50,8 @@
 | OTA 命令 | `/{version}/devices/{deviceId}/topo/otaCommand` | `OtaTaskExecutionHandler.generateResponseTopic`(行 155-157) |
 
 > 子设备用 `gatewayId` 代替 `deviceIdentification`。`sdkVersion` 如 `v1` → `/v1/devices/xxx/command`。
+>
+> **OTA ≠ 仅下行**:OTA 还有上行侧动作 —— 升级成功 / 设备版本上报会触发 `OtaModelVersionSwitcher` 把设备绑定产品版本迁到升级包配置的目标(影子)版本(幂等 + fail-soft,不打断 OTA 主流程),详见 `iot/ota.md`。
 
 ## ⚠️ 单次序列化(避免多层转义)
 

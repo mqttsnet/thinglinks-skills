@@ -79,6 +79,8 @@
 - **色系**:`src/settings/designSetting.ts` 的 `APP_PRESET_COLOR_LIST`(`#0960bd` 蓝 / `#009688` 绿 / `#8165FF` 紫 / `#ff5c93` / `#ee4f12` …);徽标如 `PropertyMethodBadge`(R 蓝 / W 橙 / RW 紫 / 未知灰)。
 - **卡片结构类**:模态内用 `.flexy-header` / `.flexy-body` / `.flexy-card` 命名空间(参考 `views/iot/link/product/detail/PublishModal.vue`)。
 - ⚠️ **Flexy 弹窗 CSS 常故意非 scoped**:因为 BasicModal `teleport` 到 body,scoped 选择器命中不到 → 用带 `.publish-flexy-wrap` 等命名空间的全局样式(组件内有注释说明)。
-- 参考实现:`product/detail`(header / PublishModal / modelDefinition / publishRecord)、`video/dashboard/stats`、`components/iot/svg`、`PropertyMethodBadge`、`link/operationMaintenance/debug`(WS/MQTT 调试:全宽分段切换 + 高亮设备区块 + 状态圆点 chip)。
+- 参考实现:`product/detail`(header / PublishModal / modelDefinition / publishRecord / `StrategyResultPanel.vue`)、`video/dashboard/stats`、`components/iot/svg`、`PropertyMethodBadge`、`link/operationMaintenance/debug`(WS/MQTT 调试:全宽分段切换 + 高亮设备区块 + 状态圆点 chip)。
+  - `StrategyResultPanel.vue`:发布后「战报」面板,接收单个 `result: StrategyResultDTO`,按策略渲染 全量(切换数/占比条)/ 灰度(命中数 + 多组明细 `canary.groups` + 来源 group/manual/percent)/ 影子(预建稳定版数);在 `publishRecord.vue` 用 `record.canaryResult` 喂入(`retryCount/maxRetryCount` 则在 `PublishRecordDetailModal.vue` 展示)。
+  - `PublishModal.vue` 新增:`maxRetryCount`(默认 3)、灰度改**多组(设备名单)**(分组多选合并去重 + 手填白名单解析,去百分比)、灰度发布前的**影响范围**说明(命中→新版本 / 其余 + 灰度期新设备→稳定版)。
 
 > 新做仪表盘/详情/发布类页面,优先沿用 Flexy 卡片 + tone 色系,与既有页面观感一致。

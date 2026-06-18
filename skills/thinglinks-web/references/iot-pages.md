@@ -13,7 +13,14 @@ views/iot/link/
 ├── productCommandRequest/ productCommandResponse/     命令请求/响应记录
 ├── productTopic/            产品 Topic(基础/自定义)
 ├── productVersion/ productVersionChangeLog/ productPublishRecord/   版本/变更日志/发布记录
-├── ota/                     OTA 升级(任务/记录)
+├── ota/                     OTA 升级(三个域,均用共享 BusinessCardList + components/iot/ota/svg)
+│   ├── otaUpgrades/         OTA 资源/升级包:index.vue = BasicTable + #cardView BusinessCardList
+│   │                        (#cardImage 走 getOtaPackageTypeSvg);详情走**独立路由** Detail/index.vue
+│   │                        (非弹窗),Edit.vue 用 IotProductVersionPicker(:publish-strategies=[影子])选目标影子版本
+│   ├── otaUpgradeTasks/     升级任务:index.vue 列表(卡片 #cardImage = OtaTaskSvg)+ Edit 抽屉,详情独立路由
+│   └── otaUpgradeRecords/   升级记录:index.vue = 任务详情页(指标卡 + Tab);列表组件
+│                            components/OtaUpgradeRecords.vue(BusinessCardList,statusResolver 多态状态,
+│                            #cardImage = OtaRecordStatusBadge)作"升级记录"Tab;记录详情独立页 OtaUpgradeRecordsCardDetail/
 ├── deviceLocation/              设备定位
 ├── dashboard/                   资产看板:assetStats(资产统计)/ assetmap(资产地图,2D/3D)
 ├── product/versionOverview/     产品版本总览
@@ -39,5 +46,7 @@ views/iot/rule/
 ```
 views/iot/mqs/bus/           消息总线统计
 ```
+
+> OTA 三页统一改用共享 `BusinessCardList` + `components/iot/ota/svg`;旧的各页 `*CardList.vue` 与 `BasicTable` 的 `isOtaUpgrades*` prop 已移除。
 
 > 加页面流程见 `routing-permission.md`;组件见 `ui-components.md`。
