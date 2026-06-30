@@ -1,8 +1,8 @@
 ---
 name: thinglinks-cloud
 description: >
-  Use when developing on the ThingLinks cloud platform (com.mqttsnet.thinglinks), across three
-  domains. (1) IoT: Groovy device-uplink rule scripts (规则脚本), the protocol envelope
+  Use when developing on the ThingLinks cloud platform (com.mqttsnet.thinglinks), across its
+  core domains and governance surfaces. (1) IoT: Groovy device-uplink rule scripts (规则脚本), the protocol envelope
   (head/dataBody/dataSign, cipherFlag), custom uplink TopicHandler, downlink commands via
   DeviceDownlinkFacade, thing-model, device/product cache, TDengine + device shadow, ACL / MQTT
   topic matching, WS downlink broadcast, the uplink bus (DeviceEventProcessor / TopicHandler),
@@ -11,10 +11,11 @@ description: >
   OTA 升级与物模型版本切换 (OtaModelVersionSwitcher).
   (2) System foundation: the reactive WebFlux gateway (Sa-Token auth, Nacos routing, Sentinel),
   oauth login/token (Sa-Token grant types), the system/base modules (Def* vs Base*), the
-  boot/cloud Facade duality, and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
+  boot/cloud Facade duality, `/inner/**` internal API governance, and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
   created_org_id tenant line). (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
-  RTP). Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
-  网关/鉴权/Sa-Token, 多租户, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
+  RTP). (4) Security/runtime governance: TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
+  internal Feign endpoints, ACL cache/runtime debugging. Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
+  网关/鉴权/Sa-Token, 多租户, `/inner`, TDS/TDengine 安全, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
   gateway/oauth/system/base/broker/mqs/rule/link/video modules — even without saying "ThingLinks".
 ---
 
@@ -62,6 +63,12 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [system/auth.md](references/system/auth.md) | Sa-Token 登录/令牌、授权类型、登录流程、网关校验 + header 信任 | 改登录/认证/权限 |
 | [system/multi-tenant.md](references/system/multi-tenant.md) | DATASOURCE_COLUMN:动态数据源 + `created_org_id` 列租户线 + 数据权限;Def* vs Base* | 改多租户/数据隔离 |
 
+### 安全治理
+| File | Content | When to read |
+| --- | --- | --- |
+| [security/internal-api-governance.md](references/security/internal-api-governance.md) | `/inner/**` 内部 RPC、网关拒绝、Feign/header 透传、AnyUser→Inner 迁移检查 | 改内部接口/Feign 路径/网关放行表 |
+| [security/tdengine-script-hardening.md](references/security/tdengine-script-hardening.md) | TDengine SQL `${}`/`#{}` 边界、TdsSqlGuard、Groovy/SpEL/FreeMarker 沙箱 | 修 TDS 注入/脚本表达式执行风险 |
+
 ### 物联网 IoT
 | File | Content | When to read |
 | --- | --- | --- |
@@ -81,6 +88,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [iot/extension-points.md](references/iot/extension-points.md) | 上行三层扩展(DeviceEventProcessor / TopicHandler / 规则脚本)+ bus SPI | 给平台加动作/旁路/topic |
 | [iot/troubleshooting.md](references/iot/troubleshooting.md) | 4 道关排查 + 常见错误对照 + 日志锚点 | 上行不生效/影子无数据/脚本报错 |
 | [iot/testing.md](references/iot/testing.md) | 测试 playbook:下发(`sendMqttCustomMessage`/`dispatch`)、脚本调试(`transformDebug`)、影子/TDengine/指令记录校验、端到端流 | 测试上下行 / 验证落库 |
+| [iot/runtime-debugging.md](references/iot/runtime-debugging.md) | 连接认证 vs ACL、命令响应闭环、调试历史、路径/运行时定位 | 调运行时连接/ACL/命令响应/调试台问题 |
 
 ### 流媒体 video
 | File | Content | When to read |
@@ -96,7 +104,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ## 物联网核心:上行 / 下行 + 硬约定
 
-> 系统基础的关键约束(令牌仅网关校验、下游信任 header;DATASOURCE_COLUMN 切库+列过滤;Sa-Token 非 JWT)见 `system/*`;视频(独立平台、不走总线)见 `video/video.md`。下面是**最易踩坑的 IoT 上下行**。
+> 系统基础的关键约束(令牌仅网关校验、下游信任 header;DATASOURCE_COLUMN 切库+列过滤;Sa-Token 非 JWT;`/inner/**` 只服务间直连)见 `system/*` 与 `security/*`;视频(独立平台、不走总线)见 `video/video.md`。下面是**最易踩坑的 IoT 上下行**。
 
 - **上行**:设备 PUBLISH → broker(ACL 鉴权)→ Kafka → `*KafkaInboundConsumer` → `BusPipelineDispatcher` → 边缘适配器归一 → `DeviceBizDispatchStage` → `DeviceEventDispatcher` → `DevicePublishProcessor` →(规则脚本前置转换 `InboundScriptTransformer`)→ `TopicHandlerFactory` 按 topic 正则路由 → handler → `DeviceDataProcessingService` 落 TDengine + 设备影子。
 - **下行**:业务层 `buildCommandMessage`(序列化一次)→ `ProtocolMessageAdapter.buildResponse` → 传输层 `DeviceDownlinkFacade.dispatch(DownlinkCommand)`(boot 直调 / cloud Feign)→ `DeviceDownlinkDispatchService` 按协议选 sender(MQTT→BifroMQ / WS→RocketMQ 广播 / TCP 占位)。
@@ -123,4 +131,4 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ---
 
-> 📌 **最后核对**:`thinglinks-cloud-pro` · 2026-06-18(两线同构)。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
+> 📌 **最后核对**:`thinglinks-cloud-pro` · 2026-06-30(两线同构)。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
