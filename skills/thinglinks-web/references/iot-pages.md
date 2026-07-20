@@ -34,7 +34,7 @@ views/iot/link/
 
 ```
 views/iot/rule/
-├── engine/                  规则策略引擎
+├── engine/                  规则策略引擎;linkage 的 TriggerAlarm 通知编辑器见 rule-linkage-notification.md
 ├── alarm/                   告警(规则/记录/渠道)
 ├── groovy/ruleGroovyScript/ Groovy 规则脚本(index/detail/Edit/data.tsx)← 见 rule-script-debug.md
 ├── plugin/                  插件(信息/实例)

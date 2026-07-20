@@ -69,7 +69,7 @@
 | TS | `strict`;`no-explicit-any` off;`no-unused-vars` error(`_` 前缀变量可忽略) |
 | Style | Less + scoped;`::v-deep`/`:deep()` 允许;支持 `rpx` |
 
-改完一律 `npx eslint --fix <file>` 再 `npx eslint <file>`(warning 不阻断,error 清掉)。
+改完一律 `pnpm exec eslint --fix <file>` 再 `pnpm exec eslint <file>`(warning 不阻断,error 清掉)，避免 `npx` 临时解析到仓外版本。
 
 ## 5. Flexy 设计风格
 

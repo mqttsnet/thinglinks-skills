@@ -1,6 +1,6 @@
 # 项目结构
 
-`thinglinks-web-pro`,基于 Vben Admin。
+ThingLinks Web 管理控制台，基于 Vben Admin。产品/发行身份以根目录 `.thinglinks-product.env` 为准。
 
 ## 技术栈
 
@@ -26,14 +26,18 @@ Vue 3.3 · Vben Admin · Ant Design Vue 3.2 · Vite 4 · TypeScript · Pinia · 
 ## 构建脚本
 
 ```bash
-npm run dev            # 开发(默认)
-npm run dev:column     # COLUMN 租户
-npm run dev:datasource # DATASOURCE_COLUMN 租户
-npm run build:prod     # 生产构建
-npm run type:check     # TS 检查
-npm run lint:eslint    # ESLint
+pnpm dev                # 开发(默认)
+pnpm dev:column         # COLUMN 租户
+pnpm dev:datasource     # DATASOURCE_COLUMN 租户
+pnpm build:prod         # product:check 后生产构建
+pnpm type:check         # TS 检查
+pnpm lint:eslint        # 全量 ESLint --fix
+pnpm product:test       # 产品配置/通知/安全等 Node 回归
+pnpm product:check      # 清单、package、同步边界门禁
 ```
-多租户:`.env.*` 的 `VITE_GLOB_MULTI_TENANT_TYPE`(NONE / COLUMN / DATASOURCE_COLUMN)。
+多租户:`.env.*` 的 `VITE_GLOB_MULTI_TENANT_TYPE`(NONE / COLUMN / DATASOURCE_COLUMN)。所有直接 Vite 构建脚本都先执行 `product:check`；细节见 `product-build-security.md`。
+
+依赖统一由纳入 Git 的 `pnpm-lock.yaml` 固定；`package-lock.json` / `yarn.lock` 被忽略，不要混用包管理器。
 
 ## i18n(改文案三处)
 

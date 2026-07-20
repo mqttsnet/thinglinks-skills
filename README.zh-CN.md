@@ -29,7 +29,7 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 | --- | --- | --- |
 | [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云平台 —— **系统基础** / **IoT** / **流媒体** | **三域。** *IoT:* 规则脚本、协议信封、TopicHandler、下行、物模型、TDengine+影子、ACL、WS 广播。*系统基础:* WebFlux 网关、Sa-Token、内部接口、DATASOURCE_COLUMN 多租户、产品清单/MQ 命名空间、Nacos/Seata 部署。*流媒体:* GB28181(ZLMediaKit)。 |
 | [`thinglinks-util`](./skills/thinglinks-util/) | 框架底座 —— 协议 / 脚本 / 缓存 / 消息 / core | 协议**编解码**、Groovy 执行与安全边界、typed **cache-aside 与锁**、Kafka/RocketMQ、桥接 SPI、敏感字段加密、ID/Jackson/topic/HLC 工具和构建发行规则。 |
-| [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT **页面**(设备/产品/规则/调试/ACL)、**API 层**(defHttp)、**路由 + 权限**、Vben + IoT **组件**、规则脚本**调试面板**、**开发准则**(按域放文件 / Flexy 风格)、**i18n**。 |
+| [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT 页面、defHttp API、路由权限、共享组件、规则脚本调试、规则联动通知、产品清单/构建门禁、浏览器配置安全、i18n 与开发准则。 |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker 插件 —— `bifromq-plugin-pro` | 认证与 ACL、Kafka 事件契约、setting/限流真实边界、运行时配置与日志安全、兼容版本、打包和部署。 |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | 工作区结构 —— 社区 monorepo ↔ 旗舰独立仓 | **仓库与路径定位。** 工程映射(cloud / web / bifromq-plugin / util)、治理文件归口、独立**版本线** + `bump-version.sh`、`changelogs/` 每版一文件、Nacos 模板**占位符规则**、永不提交清单、提交风格、**安全基线**(硬性指标检查表)。 |
 
@@ -60,7 +60,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
 
 - `thinglinks-cloud` —— 28 篇 references(**`system/` · `security/` · `iot/` · `video/`**,含产品配置、内部接口治理、运行时调试、设备接入/测试)+ 3 个 Groovy 骨架 + Mermaid 架构图
 - `thinglinks-util` —— 9 篇 references(协议 / Groovy / 缓存 / 加密 / core / Kafka / RocketMQ / 桥接 / 构建发行)
-- `thinglinks-web` —— 7 篇 references(结构 / api / 路由权限 / **开发准则** / 组件 / 页面地图 / 脚本调试)
+- `thinglinks-web` —— 9 篇 references(结构 / API / 路由权限 / 开发准则 / 组件 / 页面地图 / 脚本调试 / 联动通知 / 产品构建安全)
 - `bifromq-plugin` —— 6 篇 references(认证 ACL / 事件 / setting 与限流 / 部署 / 运行时安全 / 构建发行)
 - `thinglinks-workspace` —— 1 篇 reference(`security-baseline` 安全硬性指标)
 
