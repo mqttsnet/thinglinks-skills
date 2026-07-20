@@ -1,15 +1,15 @@
 # thinglinks-cloud
 
-ThingLinks **云端业务平台**开发辅助 Agent Skill —— 帮 AI Agent 在 `thinglinks-cloud`(`com.mqttsnet.thinglinks`,模块 broker / mqs / rule / link / public)上开发:规则脚本、上行 TopicHandler、协议信封、下行命令、物模型、落库、bus 扩展、排查。
+ThingLinks **云端业务平台**开发辅助 Agent Skill —— 覆盖系统基础、IoT 与流媒体三域，包括产品配置/部署命名空间、内部接口与多租户治理、设备上下行、物模型、规则脚本、GB28181 和运行时排障。
 
-> 同家族(规划):`thinglinks-util`(框架底座)、`thinglinks-web`(前端控制台)。
+> 同家族：`thinglinks-util`(框架底座)、`thinglinks-web`(前端控制台)、`bifromq-plugin`(Broker 插件)。
 
 ## 结构
 
 ```
 thinglinks-cloud/
 ├── SKILL.md              # 入口:架构总览 + 工作流 + References Index + 反幻觉护栏
-├── references/*.md       # 聚焦小文档,按需加载(渐进式披露)
+├── references/           # system / security / iot / video 聚焦文档,按需加载
 ├── assets/rule-script/   # 规则脚本骨架(复制即改)
 └── agents/openai.yaml    # 跨工具(Codex/OpenAI)接口
 ```

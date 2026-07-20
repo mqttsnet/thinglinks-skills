@@ -27,7 +27,7 @@ Agent Skills 는 특정 도메인에 대한 **깊고 온디맨드한 컨텍스�
 
 | Skill | 저장소 | 할 수 있는 것 |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 클라우드 플랫폼 — **시스템 기반** / **IoT** / **비디오** | **3 도메인.** *IoT:* 룰 스크립트, 프로토콜 엔벨로프, TopicHandler, 다운링크(`DeviceDownlinkFacade`), 사물 모델, 캐시, TDengine+섀도우, ACL, WS 브로드캐스트. *시스템:* WebFlux 게이트웨이(Sa-Token), oauth, system/base, boot/cloud Facade, DATASOURCE_COLUMN 멀티테넌트. *비디오:* GB28181(ZLMediaKit). |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 클라우드 플랫폼 — **시스템 기반** / **IoT** / **비디오** | **3 도메인.** *IoT:* 룰 스크립트, 프로토콜 엔벨로프, TopicHandler, 다운링크, 사물 모델, TDengine+섀도우, ACL, WS 브로드캐스트. *시스템:* WebFlux, Sa-Token, 내부 API, DATASOURCE_COLUMN, 제품 매니페스트/MQ 네임스페이스, Nacos/Seata 배포. *비디오:* GB28181(ZLMediaKit). |
 | [`thinglinks-util`](./skills/thinglinks-util/) | 프레임워크 기반 — 프로토콜 / 스크립트 / 캐시 / 메시징 / core | 프로토콜 코덱, Groovy 실행과 보안 경계, typed cache-aside와 잠금, Kafka/RocketMQ, 브리지 SPI, 민감 필드 암호화, core 유틸리티, 빌드/릴리스 규칙. |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 프론트 콘솔 — Vue3 + Vben | IoT **페이지**, **API 레이어**(defHttp), **라우팅 + 권한**, Vben + IoT **컴포넌트**, 룰 스크립트 **디버그 패널**, **컨벤션**(파일 배치 / Flexy 디자인), **i18n**. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ 브로커 플러그인 — `bifromq-plugin-pro` | 인증/ACL, Kafka 이벤트 계약, setting/스로틀링의 실제 경계, 런타임 설정과 로그 보안, 호환 버전, 패키징 및 배포. |

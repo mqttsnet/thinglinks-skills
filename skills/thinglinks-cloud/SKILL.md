@@ -12,16 +12,17 @@ description: >
   (2) System foundation: the reactive WebFlux gateway (Sa-Token auth, Nacos routing, Sentinel),
   oauth login/token (Sa-Token grant types), the system/base modules (Def* vs Base*), the
   boot/cloud Facade duality, `/inner/**` internal API governance, and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
-  created_org_id tenant line). (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
+  created_org_id tenant line), product manifest rendering, MQ namespace derivation, and Nacos/Seata
+  deployment namespaces. (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
   RTP). (4) Security/runtime governance: TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
   internal Feign endpoints, ACL cache/runtime debugging. Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
-  网关/鉴权/Sa-Token, 多租户, `/inner`, TDS/TDengine 安全, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
+  网关/鉴权/Sa-Token, 多租户, `/inner`, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
   gateway/oauth/system/base/broker/mqs/rule/link/video modules — even without saying "ThingLinks".
 ---
 
 # ThingLinks Cloud Platform Development
 
-> 适用两条产品线:旗舰仓 `thinglinks-cloud-pro-datasource-column` 与社区 monorepo 子目录 `thinglinks/thinglinks-cloud`(代码同构)。仓库映射见 `thinglinks-workspace`。
+> 适用于 ThingLinks Cloud 后端源码树；具体工作区映射见 `thinglinks-workspace`。产品身份、发行信息和版本以根目录 `.thinglinks-product.env` 为准，不从检出目录名推断。
 
 ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa-Token)+ BifroMQ(MQTT broker)+ Kafka/RocketMQ + TDengine + Redis + Nacos + Vue3**。包名 `com.mqttsnet.thinglinks`。**三大应用域:系统基础 / 物联网 IoT / 流媒体 video**,references 按域分目录。
 
@@ -34,7 +35,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | `thinglinks-oauth` | 登录/令牌(Sa-Token:验证码/密码/短信/refresh) |
 | `thinglinks-system` | 平台级 `Def*` 实体(租户/用户/客户端/应用·资源/字典/区域) |
 | `thinglinks-base` | 租户级 `Base*` 业务(组织/员工/角色/字典/文件/消息/操作日志) |
-| `thinglinks-public`(common/-config) | 共享属性·常量·缓存 key、鉴权放行表、Mybatis 租户/数据权限拦截器、动态数据源 |
+| `thinglinks-public`(common/-config) | 共享属性·MQ 路由常量·缓存 key、鉴权放行表、Mybatis 租户/数据权限拦截器、动态数据源 |
 | `thinglinks-sop-gateway` / `thinglinks-support` | 开放平台网关(ISV 签名)/ 监控 + XXL-Job 执行器 |
 
 ### 物联网 IoT(`references/iot/`)
@@ -51,7 +52,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | --- | --- |
 | `thinglinks-video` | 独立 GB28181 视频平台(前置 ZLMediaKit/ABL,SIP/RTP,**与 IoT 模型独立**) |
 
-> 框架仓 `thinglinks-util-pro`(`com.mqttsnet.basic.*`:协议编解码、Groovy 引擎、core 工具、租户上下文/DB 插件)见 **`thinglinks-util`** skill;前端 `thinglinks-web-pro` 见 **`thinglinks-web`** skill。
+> 框架仓(`com.mqttsnet.basic.*`:协议编解码、Groovy 引擎、core 工具、租户上下文/DB 插件)见 **`thinglinks-util`** skill；前端控制台见 **`thinglinks-web`** skill。
 
 ## References Index
 
@@ -62,6 +63,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [system/gateway.md](references/system/gateway.md) | WebFlux 网关:Nacos 路由、Sa-Token 鉴权过滤器、Sentinel、CORS、放行表、sop-gateway | 改网关路由/鉴权/限流 |
 | [system/auth.md](references/system/auth.md) | Sa-Token 登录/令牌、授权类型、登录流程、网关校验 + header 信任 | 改登录/认证/权限 |
 | [system/multi-tenant.md](references/system/multi-tenant.md) | DATASOURCE_COLUMN:动态数据源 + `created_org_id` 列租户线 + 数据权限;Def* vs Base* | 改多租户/数据隔离 |
+| [system/product-configuration.md](references/system/product-configuration.md) | 产品清单、版本渲染、MQ 路由派生、Nacos/Seata 运行命名空间、跨发行同步边界 | 改版本/产品配置/MQ 前缀/部署命名空间 |
 
 ### 安全治理
 | File | Content | When to read |
@@ -106,6 +108,8 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 > 系统基础的关键约束(令牌仅网关校验、下游信任 header;DATASOURCE_COLUMN 切库+列过滤;Sa-Token 非 JWT;`/inner/**` 只服务间直连)见 `system/*` 与 `security/*`;视频(独立平台、不走总线)见 `video/video.md`。下面是**最易踩坑的 IoT 上下行**。
 
+产品身份、Cloud/Util 版本与 MQ 前缀只改 `.thinglinks-product.env` 后走 `product-config.sh`；`NACOS_NAMESPACE` / `SEATA_NAMESPACE` 是独立的部署变量。详见 `system/product-configuration.md`。
+
 - **上行**:设备 PUBLISH → broker(ACL 鉴权)→ Kafka → `*KafkaInboundConsumer` → `BusPipelineDispatcher` → 边缘适配器归一 → `DeviceBizDispatchStage` → `DeviceEventDispatcher` → `DevicePublishProcessor` →(规则脚本前置转换 `InboundScriptTransformer`)→ `TopicHandlerFactory` 按 topic 正则路由 → handler → `DeviceDataProcessingService` 落 TDengine + 设备影子。
 - **下行**:业务层 `buildCommandMessage`(序列化一次)→ `ProtocolMessageAdapter.buildResponse` → 传输层 `DeviceDownlinkFacade.dispatch(DownlinkCommand)`(boot 直调 / cloud Feign)→ `DeviceDownlinkDispatchService` 按协议选 sender(MQTT→BifroMQ / WS→RocketMQ 广播 / TCP 占位)。
 
@@ -131,4 +135,4 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ---
 
-> 📌 **最后核对**:`thinglinks-cloud-pro` · 2026-06-30(两线同构)。类名/包名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
+> **最后核对**：类名、包名和配置契约随版本演进，落地前核对当前源码 `com.mqttsnet.thinglinks.*` 与根目录产品清单。

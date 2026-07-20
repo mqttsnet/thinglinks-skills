@@ -1,6 +1,6 @@
 # WS 下行广播 + 设备会话注册表
 
-`thinglinks-broker` 的 WebSocket 下行投递与多节点会话管理。**重构要点**:旧 `SessionOwnerRegistry`(Redis 存 `ip:port` + RestTemplate 反向点对点路由)已**整体废弃**,换成 `WsDeviceSessionRegistry`(只答"在不在线",**不路由**)+ **RocketMQ `BROADCASTING` 广播扇出**。
+`thinglinks-broker` 的 WebSocket 下行投递与多节点会话管理。当前路由由 `WsDeviceSessionRegistry`(只答"在不在线",**不路由**)+ RocketMQ `BROADCASTING` 广播扇出完成。
 
 ## 核心理念(先记这一条)
 
@@ -31,7 +31,7 @@
    ├ 2. 编码一次 WsCommandProtocolEncoder.encodeDown → WS 子协议 JSON 帧
    ├ 3. 本地优先:Holder.get(clientId)!=null(设备就在本节点)→ publishLocal → notify → sendText ─► WS 客户端
    └ 4. 不在本地 → broadcast:rocketmqTemplate.asyncSend(WebSocket.COMMAND_DOWNLINK, WsCommandBroadcastEvent)
-            ▼  RocketMQ topic "thinglinks-ws-command-downlink"(BROADCASTING,每个节点都收到)
+            ▼  RocketMQ topic "<mq-namespace>-ws-command-downlink"(BROADCASTING,每个节点都收到)
         node-1 / node-2(持有者)/ node-N 各自 WsCommandDownlinkListener:
             Holder.get(clientId)==null → 忽略 ;  持有者 → publishLocal → notify → sendText ─► WS 客户端
 ```
@@ -42,12 +42,13 @@
 
 | 常量 | 值 | 出处 |
 | --- | --- | --- |
-| 下行广播 topic | `thinglinks-ws-command-downlink` | `BizMqRouteConstant.WebSocket.COMMAND_DOWNLINK` |
-| 下行消费组前缀 | `CID_THINGLINKS_WS_COMMAND_DOWNLINK_` + `${spring.application.name}` | `BizMqRouteConstant.Groups.WS_COMMAND_DOWNLINK_PREFIX` |
-| 心跳同步 topic | `thinglinks-ws-heartbeat-sync` | `BizMqRouteConstant.WebSocket.HEARTBEAT_SYNC` |
+| 下行广播 topic | `<mq-namespace>-ws-command-downlink` | `BizMqRouteConstant.WebSocket.COMMAND_DOWNLINK` |
+| 下行消费组前缀 | `CID_<MQ_NAMESPACE_UPPER>_WS_COMMAND_DOWNLINK_` + `${spring.application.name}` | `BizMqRouteConstant.Groups.WS_COMMAND_DOWNLINK_PREFIX` |
+| 心跳同步 topic | `<mq-namespace>-ws-heartbeat-sync` | `BizMqRouteConstant.WebSocket.HEARTBEAT_SYNC` |
+| 心跳消费组前缀 | `CID_<MQ_NAMESPACE_UPPER>_WS_HEARTBEAT_SYNC_` + `${spring.application.name}` | `BizMqRouteConstant.Groups.WS_HEARTBEAT_SYNC_PREFIX` |
 | 会话缓存 key 段 | `def_ws_session`(模块 `broker`,TTL 90s) | `CacheKeyTable.Broker.WS_SESSION` |
 
-> Key 形如 `{prefix}:{tenantId}:broker:def_ws_session:id:obj:{clientId}` → `WsDeviceSessionInfo`。消费者均带 `@ConditionalOnProperty(rocketmq.name-server)`,无 MQ 时降级为纯本地单机。
+> `<mq-namespace>` 来自根目录产品清单并由 `product-config.sh` 渲染；不是 `NACOS_NAMESPACE`。Key 形如 `{prefix}:{tenantId}:broker:def_ws_session:id:obj:{clientId}` → `WsDeviceSessionInfo`。消费者均带 `@ConditionalOnProperty(rocketmq.name-server)`,无 MQ 时降级为纯本地单机。
 
 ## 心跳与 TTL 自愈
 
@@ -57,7 +58,9 @@
 
 ## ⚠️ 反幻觉
 
-- 旧 `SessionOwnerRegistry` / `ip:port` 反向路由**已删**,别按它写;现在"注册表(在线)"与"广播(投递)"两件事拆开。
+- 注册表只判断在线，广播负责投递；不要引入节点地址或反向 HTTP 路由。
 - 下行能否送达取决于**本地 `WebSocketSubject.Holder`**,不是 Redis;Redis 只做在线拦截。
 - 广播是 **RocketMQ `BROADCASTING`**(每节点一份)而非 `CLUSTERING`。
+- Topic 与 Consumer Group 前缀由 `THINGLINKS_MQ_NAMESPACE` 派生，不要在业务代码或部署文档中写死默认值。
+- 两个 WS listener 当前都用 `${spring.application.name}` 作为 Group 后缀；不要仅按常量注释推断主机/IP 后缀。
 - 类名/行号随版本演进,核对真实代码 `com.mqttsnet.thinglinks.broker.*` / `...common.cache.broker.ws`。

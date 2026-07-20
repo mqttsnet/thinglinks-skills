@@ -56,7 +56,7 @@ flowchart TB
   EN --> LF{本地持有?<br/>WebSocketSubject.Holder}
   LF -->|是| L[publishLocal → sendText ► 客户端]
   LF -->|否| BC[broadcast WsCommandBroadcastEvent]
-  BC --> RMQ[(RocketMQ BROADCASTING<br/>thinglinks-ws-command-downlink)]
+  BC --> RMQ[(RocketMQ BROADCASTING<br/>MQ_NAMESPACE-ws-command-downlink)]
   RMQ --> N1[node-1 Listener<br/>不持有 → 忽略]
   RMQ --> N2[node-2 持有者 Listener<br/>publishLocal → sendText ► 客户端]
   RMQ --> N3[node-N Listener<br/>不持有 → 忽略]
