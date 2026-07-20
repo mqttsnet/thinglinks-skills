@@ -30,7 +30,7 @@ Agent Skills は、特定ドメインの **深いオンデマンドコンテキ�
 | [`thinglinks-cloud`](./skills/thinglinks-cloud/) | クラウド基盤 — **システム基盤** / **IoT** / **動画** | **3 ドメイン。** *IoT:* ルールスクリプト、プロトコル封筒、TopicHandler、下り(`DeviceDownlinkFacade`)、物モデル、キャッシュ、TDengine+シャドウ、ACL、WS ブロードキャスト。*システム:* WebFlux ゲートウェイ(Sa-Token)、oauth、system/base、boot/cloud Facade、DATASOURCE_COLUMN マルチテナント。*動画:* GB28181(ZLMediaKit)。 |
 | [`thinglinks-util`](./skills/thinglinks-util/) | フレームワーク基盤 — プロトコル / スクリプト / キャッシュ / メッセージング / core | プロトコルコーデック、Groovy の実行と安全境界、typed cache-aside とロック、Kafka/RocketMQ、ブリッジ SPI、機密フィールド暗号化、core ユーティリティ、ビルド/リリース規則。 |
 | [`thinglinks-web`](./skills/thinglinks-web/) | フロントコンソール — Vue3 + Vben | IoT **ページ**、**API 層**(defHttp)、**ルーティング + 権限**、Vben + IoT **コンポーネント**、ルールスクリプト **デバッグパネル**、**規約**(ファイル配置 / Flexy デザイン)、**i18n**。 |
-| [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ ブローカープラグイン — `bifromq-plugin-pro` | BifroMQ **認証 + ACL**(`IAuthProvider`)、**イベントコレクター**(`IEventCollector` → Kafka)、**setting** & **resource-throttler**、`EventTypeEnum ↔ DeviceActionTypeEnum` マッピング、プラグイン **デプロイ**。 |
+| [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ ブローカープラグイン — `bifromq-plugin-pro` | 認証/ACL、Kafka イベント契約、setting/スロットリングの実装境界、実行時設定とログ安全性、互換バージョン、パッケージング、デプロイ。 |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | ワークスペース構成 — Community monorepo ↔ Enterprise 各リポジトリ | **リポジトリ/パス特定。** リポジトリ対応表、ガバナンスファイル配置、独立**バージョンライン** + `bump-version.sh`、`changelogs/` 方式、Nacos テンプレートの**プレースホルダ規則**、コミット禁止ファイル、コミット規約、**セキュリティベースライン**(必須チェックリスト)。 |
 
 ## 🚀 インストール

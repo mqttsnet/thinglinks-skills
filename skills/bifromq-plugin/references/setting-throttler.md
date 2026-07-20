@@ -1,14 +1,44 @@
-# 配置提供 + 资源限流
+# Setting and Resource Providers
 
-## ISettingProvider(setting-provider-plugin)
+Both providers run on broker-controlled synchronous paths. Their callbacks must
+return from in-memory state and must not call databases, HTTP services, or remote
+caches.
 
-实现 `BifromqSettingProviderPluginSettingProvider`(行 70)。
-- `provide(Setting setting, String tenantId)` → `String/Long/Boolean`,返回**租户级**运行时配置;
-- ⚠️ **必须同步、只读内存**(BifroMQ 高频调用,**禁 DB / RPC / 阻塞**)。
-- ⚠️ **铁律**:BifroMQ 启动参数加 **`-Dsetting_provide_init_value=true`**,否则 `provide` 的 cache miss 会用内核默认值 → **插件配置全部被覆盖失效**(连带 `PING_REQ` 心跳采集不到)。
+## Setting Provider
 
-## IResourceThrottler(resource-throttler-plugin)
+Start BifroMQ with:
 
-实现 `BifromqResourceThrottlerPluginResourceThrottlerProvider`。多租户资源隔离 / 限流(连接数、消息速率等)。同步路径,逻辑保持轻量。
+```text
+-Dsetting_provide_init_value=true
+```
 
-> 两者都在 BifroMQ event loop 的同步路径上 —— 实现里**不要**做任何阻塞/远程调用。
+Without this flag, a setting cache miss uses BifroMQ's initial value instead of
+calling the plugin. The custom `DebugModeEnabled` value then has no effect, and
+`PING_REQ` events needed by the heartbeat pipeline are not collected.
+
+The current provider handles:
+
+| Setting | Source |
+| --- | --- |
+| `DebugModeEnabled` | `pluginConfig.debugModeEnabled`, fallback `true` |
+| `MaxTopicFiltersPerSub` | `pluginConfig.maxTopicFiltersPerSub` |
+| `MaxTopicFiltersPerInbox` | `pluginConfig.maxTopicFiltersPerInbox` |
+| other settings | `setting.current(tenantId)` |
+
+Despite accepting `tenantId`, the three configured values are currently global.
+Do not describe them as tenant-specific until a real per-tenant lookup is added
+without blocking the callback.
+
+## Resource Throttler
+
+`IResourceThrottler.hasResource(tenantId, type)` currently logs the call and
+returns `true`. It does not enforce connection, message-rate, storage, or other
+tenant limits.
+
+Before claiming resource isolation:
+
+1. define the resource policy and source of in-memory limits;
+2. remove per-call `INFO` logging from the hot path;
+3. return `false` for tested exhaustion cases;
+4. verify the resulting `ResourceThrottling` event reaches the event collector;
+5. test callback latency under load.

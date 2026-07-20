@@ -1,19 +1,21 @@
 # bifromq-plugin
 
-ThingLinks **BifroMQ broker 插件**开发辅助 Agent Skill —— 帮 AI Agent 在 `bifromq-plugin-pro`(`com.mqttsnet.thinglinks`,BifroMQ 3.3.5 SPI)上开发:认证 + ACL、事件采集(Kafka)、配置提供、资源限流。
-
-> 同家族:`thinglinks-cloud` / `thinglinks-util` / `thinglinks-web`。它是 broker 侧"门卫 + 事件出口",上游喂 `thinglinks-cloud` 的 mqs。
+ThingLinks BifroMQ 3.3.5 broker plugin skill，覆盖认证与 ACL、事件到
+Kafka、setting/resource provider、运行时配置与日志安全、构建和发行边界。
 
 ## 结构
 
-```
+```text
 bifromq-plugin/
 ├── SKILL.md
 ├── references/
-│   ├── auth-acl.md          # IAuthProvider:认证 + 发布/订阅 ACL(快/慢路径 + 缓存)
-│   ├── event-collector.md   # IEventCollector:EventTypeEnum → Kafka topic
-│   ├── setting-throttler.md # ISettingProvider + IResourceThrottler
-│   └── deploy-config.md     # 构建 / config.yaml / 装进 BifroMQ
+│   ├── auth-acl.md
+│   ├── event-collector.md
+│   ├── setting-throttler.md
+│   ├── deploy-config.md
+│   ├── runtime-safety.md
+│   └── build-release.md
+├── assets/standalone-register.yml
 └── agents/openai.yaml
 ```
 
@@ -23,8 +25,5 @@ bifromq-plugin/
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin -g
 ```
 
-## 维护约定
-
-- BifroMQ **3.3.5**(`com.baidu.bifromq.*`);别按 4.0 写。
-- 同步路径(setting/throttler/ACL 快路径)**禁阻塞/远程调用**。
-- 内容以真实代码为准,核对 `com.mqttsnet.thinglinks.*`。
+内容以 `bifromq-plugin-pro` 当前代码为准。不得把未实现的资源限流、缓存刷新、
+日志隔离或消息可靠性写成现有能力。

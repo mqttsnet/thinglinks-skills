@@ -30,7 +30,7 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 | [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink (`DeviceDownlinkFacade`), thing-model, cache, TDengine + shadow, ACL, WS broadcast, bus extension points. *System:* WebFlux gateway (Sa-Token), oauth, system/base, boot/cloud Facade duality, DATASOURCE_COLUMN multi-tenant. *Video:* GB28181 streaming (ZLMediaKit). |
 | [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — protocol / script / cache / messaging / core | Protocol **codec**, Groovy execution and safety boundaries, typed **cache-aside and locks**, Kafka/RocketMQ, databridge SPI, sensitive-field encryption, IDs/Jackson/topic/HLC utilities, and build/release rules. |
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT **pages** (device / product / rule / debug / ACL), **API layer** (defHttp), **routing + permission**, Vben + IoT **components**, the rule-script **debug panel**, **conventions** (file placement / Flexy design), **i18n**. |
-| [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | BifroMQ **auth + ACL** (`IAuthProvider`), **event collector** (`IEventCollector` → Kafka), **setting** & **resource-throttler** providers, the `EventTypeEnum ↔ DeviceActionTypeEnum` mapping, plugin **deployment**. |
+| [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | Auth/ACL, Kafka event contracts, setting/throttler realities, runtime config and logging safety, compatibility versions, packaging, and deployment. |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | workspace layout — Community monorepo ↔ Enterprise repos | **Repo & path locator.** Repo-to-repo mapping (cloud / web / bifromq-plugin / util), governance-file placement, independent **version lines** + `bump-version.sh`, `changelogs/` per-release layout, Nacos template **placeholder rules**, never-commit local files, commit style, **security baseline** (hard-requirements checklist). |
 
 ## 🚀 Install
@@ -61,7 +61,7 @@ Once installed, a skill **auto-triggers** in your agent when relevant — e.g. w
 - `thinglinks-cloud` — 20 references across **`system/` · `iot/` · `video/`** (incl. `iot/device-access` + `iot/testing` for simulation/testing) + 3 Groovy skeletons + Mermaid diagrams
 - `thinglinks-util` — 9 references (protocol / Groovy / cache / encryption / core / Kafka / RocketMQ / databridge / build-release)
 - `thinglinks-web` — 7 references (structure / api / routing-permission / **conventions** / ui-components / iot-pages / rule-script-debug)
-- `bifromq-plugin` — 4 references (`auth-acl` / `event-collector` / `setting-throttler` / `deploy-config`)
+- `bifromq-plugin` — 6 references (auth-ACL / events / setting-throttler / deployment / runtime safety / build-release)
 - `thinglinks-workspace` — 1 reference (`security-baseline` hard-requirements checklist)
 
 ## 🏷️ Naming convention

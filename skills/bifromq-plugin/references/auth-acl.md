@@ -1,31 +1,58 @@
-# 认证 + ACL(auth-provider-plugin)
+# Authentication and ACL
 
-`IAuthProvider` 实现:`BifromqAuthProviderPluginAuthProvider`(`bifromq-auth-provider-plugin/auth-provider`)。
+The auth plugin implements `IAuthProvider` for MQTT 3 and MQTT 5 connections,
+then reuses authentication metadata for PUB/SUB/UNSUB authorization.
 
-## 设备认证 auth()
+## Authentication
 
-`auth(MQTT3AuthData / MQTT5AuthData)`(行 96)→ 异步 HTTP POST 平台认证端点:
-- 默认 `http://127.0.0.1:18760/link/anyTenant/deviceOpen/clientConnectionAuthentication`(`clientConnectionAuthenticationAsync` 行 225);
-- 请求体:clientId / username / password / cert;
-- 返回 `{ certificationResult, deviceInfo, aclRuleList }`;
-- 成功 → `Ok.Builder`,把 **tenantId / userId / ACL 规则嵌入 `ClientInfo` 元数据**(后续 ACL 走快路径无需再请求)。
+`auth()` builds a request with client, channel, remote-address, credential, and
+certificate data and calls the ThingLinks Link service asynchronously. A missing
+response or `certificationResult=false` returns a BifroMQ not-authorized result.
 
-## 发布/订阅 ACL check()
+On success, `ClientInfo` receives:
 
-`check(ClientInfo, MQTTAction)`(行 503)—— 覆盖 PUB / SUB / UNSUB:
+- `tenantId` and device identification;
+- serialized `DeviceInfo` metadata;
+- enabled device ACL rules when returned by the service.
 
-1. **快路径**(行 560):从 `ClientInfo.metadataMap[ACL_RULE]` 取 ACL 规则(JSON),**priority 升序**,**首个 topic 命中的规则**决定 allow/deny。
-   - 通配匹配用 util 的 `MqttTopicMatcher`(`+`/`#`/`/`);
-   - 占位符 `{deviceId}` / `{productId}` / `{clientId}` 由 `AclTopicPatternPlaceholderReplacer` 替换后再匹配。
-2. **慢路径/回退**(行 623 `checkAclViaHttpApiAsync`):元数据未命中或解析失败 → 异步 HTTP POST `…/link/anyTenant/deviceOpen/clientAclValidation`,HTTP 200 = 允许。
-3. **缓存**(行 109):Caffeine `AsyncCache`,key = `clientId|actionType|topic`(topic 多斜杠归一化),默认 200w 容量 / 10min 过期 / 2min 后台刷新,内部防并发击穿。
-4. **直接放行**:ACL 关闭(`acl.enabled=false`)或 tenantId 在白名单。
+These fields are authorization inputs and may contain sensitive data. Do not log
+the credential, certificate, complete metadata map, or complete response.
 
-> ⚠️ 全程**不阻塞 BifroMQ event loop**:HTTP 异步、CPU 工作丢 executor。
+## ACL Decision Order
 
-## 模型 / 配置
+1. `acl.enabled=false` allows the action.
+2. A tenant in `tenantWhitelist` allows the action.
+3. `AsyncCache` deduplicates concurrent misses by
+   `clientId|actionType|normalizedTopic`.
+4. Client metadata rules are filtered by action, sorted by ascending priority,
+   expanded for `{deviceId}`, `{productId}`, and `{clientId}`, then the first
+   matching topic rule decides allow or deny.
+5. Missing, inapplicable, or malformed metadata rules fall back to the
+   asynchronous ACL HTTP endpoint.
+6. Only HTTP 200 allows. Network errors, non-200 responses, and escaped cache
+   loader exceptions return `false`.
 
-- `DeviceInfo`、`DeviceAclRule`(`auth-plugin-context`)。
-- `AuthProviderConfig`:`auth.baseUrl`(18760)、`auth.clientAuthEndpoint`、`acl.enabled`、`acl.aclCheckEndpoint`、`acl.tenantWhitelist`、`acl.cache{maxSize/expireMinutes/refreshAfterWrite}`。
+The final decision is fail-closed, but disabling ACL and tenant allowlisting are
+explicit bypasses and require deployment review.
 
-> 平台侧 ACL 规则的产生/匹配(`AclMatcherUtil`、ACL 规则配置)见 `thinglinks-cloud` 的 `acl-topic-match.md`;这里是 **broker 侧的执行点**。
+## Cache Truth
+
+| Item | Current behavior |
+| --- | --- |
+| Backend | Caffeine `AsyncCache<CacheKey, Boolean>` |
+| Packaged config | max 2,000,000 entries; expire after write 10 minutes |
+| Java fallback | max 1,000,000 entries; expire after write 10 minutes |
+| Concurrent miss | one shared loader future per key |
+| Loader exception | not cached; current request is denied |
+| `refreshAfterWrite` | configuration field exists but builder never applies it |
+
+Do not describe the cache as refreshing after two minutes until the builder uses
+`refreshAfterWrite` and tests cover refresh failure semantics.
+
+## Review Checklist
+
+- Keep HTTP calls asynchronous and CPU matching off the broker event loop.
+- Preserve priority-first, first-match semantics when changing ACL rules.
+- Test MQTT 3 and MQTT 5 rejection behavior.
+- Test metadata allow/deny, metadata fallback, non-200, timeout, disabled ACL,
+  and tenant allowlist separately.

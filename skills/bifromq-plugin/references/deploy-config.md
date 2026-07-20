@@ -1,44 +1,48 @@
-# 构建 + 配置 + 部署进 BifroMQ
+# Runtime Configuration and Deployment
 
-## 构建
+## Effective Configuration
 
-```bash
-mvn clean package -DskipTests   # 生成 4 个 *.zip 插件包(auth / event / setting / resource)
-```
+Each plugin's `ConfigUtil` loads two sources:
 
-## 配置(各插件 `*/conf/config.yaml`)
+1. `classpath:/config.yaml` from the context module provides built-in defaults.
+2. `./conf/standalone.yml` is parsed as an optional runtime override.
 
-**Auth**(`authProviderConfig`):
+The override copies non-null top-level properties; it is not a recursive deep
+merge. Auth and event sections should therefore be supplied as complete sections
+when overridden. Unknown YAML properties are ignored.
+
+`getOverwriteConfig()` currently catches every read/parse error and silently
+falls back to built-in defaults. For the auth plugin this may leave
+`acl.enabled=false`; deployment verification must confirm the effective ACL state.
+The `conf/config.yaml` carried in each ZIP is an allowed deployment artifact, but
+the current loader does not use it as the external override path.
+
+## Registration
+
+After extracting all four ZIPs into BifroMQ's plugin directory, configure these
+providers in `conf/standalone.yml`:
+
 ```yaml
-authProviderConfig:
-  auth:
-    baseUrl: http://127.0.0.1:18760
-    clientAuthEndpoint: /link/anyTenant/deviceOpen/clientConnectionAuthentication
-  acl:
-    enabled: false                 # 开 ACL 鉴权
-    aclCheckEndpoint: /link/anyTenant/deviceOpen/clientAclValidation
-    tenantWhitelist: []
-    cache: { maxSize: 2000000, expireMinutes: 10, refreshAfterWrite: 2 }
+authProviderFQN: com.mqttsnet.thinglinks.BifromqAuthProviderPluginAuthProvider
+settingProviderFQN: com.mqttsnet.thinglinks.BifromqSettingProviderPluginSettingProvider
+resourceThrottlerFQN: com.mqttsnet.thinglinks.BifromqResourceThrottlerPluginResourceThrottlerProvider
 ```
-**Event**(`eventProviderConfig.kafka`):`bootstrapServers`、`producer.acks=1`、`compressionType=lz4`、`batchSize=131072`、`lingerMs=20`、`bufferMemory=268435456`。
 
-## 部署进 BifroMQ
+Register the event collector using the BifroMQ 3.3.5 event-collector setting and
+the implementation shipped by the event plugin. Keep the required JVM flag:
 
-1. 解压 4 个 zip 到 BifroMQ `plugins/` 目录;
-2. `standalone.yml` 配置 FQN:
-   ```yaml
-   authProviderFQN: com.mqttsnet.thinglinks.BifromqAuthProviderPluginAuthProvider
-   settingProviderFQN: com.mqttsnet.thinglinks.BifromqSettingProviderPluginSettingProvider
-   resourceThrottlerFQN: com.mqttsnet.thinglinks.BifromqResourceThrottlerPluginResourceThrottlerProvider
-   # event-collector 同理按 BifroMQ 的 eventCollector 配置项接入
-   ```
-3. ⚠️ `bin/bifromq-start.sh` 启动参数**加 `-Dsetting_provide_init_value=true`**(否则 setting 失效 + 心跳采集不到);
-4. 重启 BifroMQ。
+```text
+-Dsetting_provide_init_value=true
+```
 
-## 版本
+## Deployment Checks
 
-BifroMQ **3.3.5**(`com.baidu.bifromq.*`)。升 4.0 需全局把包名换成 `org.apache.bifromq.*`(各插件 README 有 3.3.5→4.0 差异表)。
-
-## 文档
-
-仓库根 `README.md` / `README.zh-CN.md` + 各插件 `*/README.md`(event 插件 README 重点讲 `PING_REQ` 前置条件与 processor 包结构)。
+- Authentication endpoint and ACL endpoint resolve from the complete auth
+  section expected by `PluginConfig`.
+- ACL is enabled or disabled intentionally; allowlisted tenants are reviewed.
+- Kafka bootstrap and optional SASL fields are present without logging the JAAS
+  string.
+- All four provider FQNs load, and no 4.x `org.apache.bifromq.*` class is mixed
+  into the 3.3.5 runtime.
+- Connect, publish, subscribe, heartbeat, Kafka event, setting, and shutdown
+  smoke tests pass after restart.
