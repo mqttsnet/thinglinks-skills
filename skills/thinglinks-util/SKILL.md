@@ -1,63 +1,66 @@
 ---
 name: thinglinks-util
 description: >
-  Use when working on the ThingLinks framework foundation repo thinglinks-util-pro
-  (com.mqttsnet.basic): the protocol-starter (ProtocolMessageAdapter / envelope encode
-  & decode / SM4 & AES encryption / SHA256 dataSign / EncryptionDetailsDTO), the
-  groovy-engine-starter (EngineExecutor / ExecuteParams binding / GroovyCompiler /
-  ScriptRegistry hot-reload cache), the kafka-starter (KafkaProducerService keyed send / transaction policy / DLT consumer), the databridge-starter (Sink/Source/Serializer SPI for bridge rules), or thinglinks-core utilities (SnowflakeIdUtil,
-  LampJacksonModule Long-to-String serialization, MqttTopicMatcher, TopicPlaceholders,
-  DateUtils, JsonUtil, Sm3/Sm4/AES crypto). Trigger whenever the user touches the protocol
-  envelope codec, the Groovy script engine internals, or shared util classes — especially
-  changes with global blast radius (Jackson serialization, snowflake IDs, topic matching).
+  Use when working on ThingLinks framework foundation modules in thinglinks-util-pro:
+  protocol envelopes, Groovy execution, cache and locks, Kafka or RocketMQ,
+  databridge, sensitive-field encryption, shared core utilities, or Maven
+  version/build/release maintenance. Trigger especially for changes with
+  cross-service serialization, security, context propagation, ordering, or
+  compatibility impact.
 ---
 
-# ThingLinks Util (framework foundation)
+# ThingLinks Util
 
-> 适用两条产品线:旗舰仓 `thinglinks-util-pro`;社区线以 Maven 依赖消费同版工件(`thinglinks-util.version` 锚定)。仓库映射见 `thinglinks-workspace`。
+`thinglinks-util-pro` 是 ThingLinks 的框架底座检出目录，公共 Maven 身份为
+`com.mqttsnet.basic:thinglinks-util`。目录后缀不是 Maven 坐标或发行版本。
 
-`thinglinks-util-pro` 是被各业务模块依赖的**独立框架仓**,包名 `com.mqttsnet.basic`。改动是**全局行为**,影响所有下游(cloud 的 broker/mqs/rule/link 都依赖它)。
+## 重点模块
 
-## 模块
-
-| 模块 | 职责 |
+| 模块 | 关键能力 |
 | --- | --- |
-| `thinglinks-protocol-starter` | ThingLinks 协议信封**编解码**:`ProtocolMessageAdapter` + 加解密(SM4/AES)+ 签名(SHA256)+ topic 变量提取 |
-| `thinglinks-groovy-engine-starter` | Groovy 脚本**编译 + 执行**引擎:`EngineExecutor`、热加载缓存、脚本注册表 |
-| `thinglinks-core` | 通用工具:`SnowflakeIdUtil`、`LampJacksonModule`、`MqttTopicMatcher`、`DateUtils`、`JsonUtil`、SM3/SM4/AES、常量 |
+| `thinglinks-protocol-starter` | 协议信封编解码、签名、SM4/AES、topic 变量提取 |
+| `thinglinks-groovy-engine-starter` | 脚本编译执行、Binding、热加载缓存、编译期安全限制 |
+| `thinglinks-cache-starter` | Redis/Caffeine、typed cache-aside、List 缓存、锁 |
+| `thinglinks-kafka-starter` | 带 key 发送、事务 opt-in、DLT 消费 |
+| `thinglinks-rocketmq-starter` | 发送封装、LocalMap 上下文透传、租户感知消费 |
+| `thinglinks-databridge-starter` | Sink/Source/Serializer SPI 与连接复用 |
+| `thinglinks-core` | ID、Jackson、topic、HLC、敏感字段加密、通用工具 |
 
-> 协议**信封结构**(给设备/规则脚本用)在 `thinglinks-cloud` skill 的 `protocol-envelope.md`;本 skill 讲**编解码实现**。
+协议信封的业务结构见 `thinglinks-cloud`；本 skill 关注底座实现与跨服务契约。
 
-## 工作流
+## 工作规则
 
-1. 改动前想清**爆炸半径**:`LampJacksonModule`/`SnowflakeIdUtil`/`MqttTopicMatcher` 一改,所有依赖模块行为变。
-2. 编译后 **`mvn install` 到本地仓**,主库才拉得到新版本(否则用旧 jar)。
-3. 各 starter 自动配置可由开关控制(如 `thinglinks.groovy.engine.enable=true`)。
+1. 先确认改动属于哪个 starter，并检查下游序列化、安全、租户上下文和兼容性影响。
+2. 从根聚合工程构建；需要让下游消费本地改动时执行 `mvn install`，不能只编译子模块。
+3. 版本修改走产品配置脚本，禁止分别手改 Parent/BOM 的 `revision`。
+4. 发布必须显式启用 release profile，签名与仓库凭据始终保留在仓库之外。
 
-## ⚠️ 重要(反幻觉)
+## 关键边界
 
-- `SnowflakeIdUtil.nextId()` 返回 **String(16 位)**;`nextLong()` 返回 **long** —— 协议里 mid 要数值就用 `nextLong()`。
-- `LampJacksonModule` 把 **`Long.class` / `Long.TYPE` / BigInteger / BigDecimal 全局序列化成 String**(防 JS 精度丢失)—— 这是"规则脚本 payload 必须 `JSON.toJSONString`"的根因。
-- `MqttTopicMatcher`:`#` 匹配一切、`/#` 须前导 `/`、`#` 须在末尾、blank pattern 放行、blank topic 不匹配。
-- 加解密统一 **CBC + PKCS5Padding**,密文走 **HEX**;密钥/IV 16/24/32 字节。
-- `HybridLogicalClockUtil.nextHlc()` 是**因果排序键**(`物理ms<<16 | 16位计数器`),严格单调;**不是时间戳**,别写进 datetime/时序索引。
-- 类名/方法签名随版本演进,核对真实代码 `com.mqttsnet.basic.*`。
+- `SnowflakeIdUtil.nextId()` 会把完整雪花值取模成 16 位字符串；不能用于要求硬性全局唯一的主键。协议 `mid` 等数值字段使用 `nextLong()`。
+- `LampJacksonModule` 将 `Long`、`long`、`BigInteger`、`BigDecimal` 全局序列化为字符串。
+- `HybridLogicalClockUtil.nextHlc()` 只保证当前 JVM 内单调；它不是毫秒时间戳，也不是带跨节点合并的完整 HLC。
+- List 缓存必须使用 `getOrLoadList` / `hGetOrLoadList`；同一 key/field 不得与单对象 API 混用。
+- `ENC@` 敏感字段只能成功解密或抛错；禁止在加解密失败后回退明文或原值。
+- AES 使用 CBC + PKCS5Padding、HEX；key 为 16/24/32 字节，IV 固定 16 字节。
+- Groovy 限制是同 JVM 内的纵深防御，不是执行不可信脚本的强隔离沙箱。
+- `RocketmqTemplate.getRaw()` 不自动注入 LocalMap header；需要上下文时使用封装 API 或先构造带 header 的消息。
 
 ## References Index
 
 | File | Content | When to read |
 | --- | --- | --- |
-| [references/protocol-codec.md](references/protocol-codec.md) | `ProtocolMessageAdapter`、`encryptMessage`/`decryptMessage`、cipherFlag、dataSign、Sm4/Aes、DTO | 编/解协议信封,改加解密/签名 |
-| [references/groovy-engine.md](references/groovy-engine.md) | `EngineExecutor`、`ExecuteParams` 绑定、`GroovyCompiler`、`ScriptRegistry` 缓存、结果/状态 | 改脚本引擎、绑定变量、热加载 |
-| [references/core-utils.md](references/core-utils.md) | `SnowflakeIdUtil`、`LampJacksonModule`、`MqttTopicMatcher`、`HybridLogicalClockUtil`(HLC)、`TopicPlaceholders`、`DateUtils`、`JsonUtil`、crypto | 用/改 core 工具类 |
-| [references/kafka-starter.md](references/kafka-starter.md) | 生产/消费装配、带 key 发送规范、事务 opt-in 策略、`max.block.ms` 快速失败、DLT 消费基线 | 发/消费 Kafka 消息,调生产者参数 |
-| [references/databridge-starter.md](references/databridge-starter.md) | 桥接 SPI(Sink/Source/Serializer)、ConnectorRegistry 自动发现、19 Sink/3 Source 矩阵、扩展新 Sink | 桥接规则底座,新增桥接目标 |
+| [references/protocol-codec.md](references/protocol-codec.md) | 协议信封编解码、签名与加解密 | 改协议适配、签名、SM4/AES |
+| [references/groovy-engine.md](references/groovy-engine.md) | 执行、Binding、缓存与安全边界 | 改脚本引擎、绑定、热加载、沙箱 |
+| [references/cache-starter.md](references/cache-starter.md) | 后端差异、typed cache-aside、List、锁 | 改缓存、降级、防穿透、并发控制 |
+| [references/sensitive-field-encryption.md](references/sensitive-field-encryption.md) | `ENC@`、AES、MyBatis TypeHandler、fail-closed | 改敏感字段存取、密钥或错误处理 |
+| [references/core-utils.md](references/core-utils.md) | ID、Jackson、topic、HLC、日期与通用工具 | 使用或修改 core 工具类 |
+| [references/kafka-starter.md](references/kafka-starter.md) | 生产消费装配、带 key 发送、事务与 DLT | 发/消费 Kafka 消息 |
+| [references/rocketmq-starter.md](references/rocketmq-starter.md) | opt-in 装配、上下文透传、租户消费 | 发/消费 RocketMQ 消息 |
+| [references/databridge-starter.md](references/databridge-starter.md) | 桥接 SPI、自动发现与扩展 | 新增桥接目标或来源 |
+| [references/build-release.md](references/build-release.md) | 产品配置、版本同步、构建与发布边界 | 改版本、安装上游工件、准备发布 |
 
 ## 相关 skill
 
-- **[`thinglinks-cloud`](../thinglinks-cloud/)** — 这些工具的**业务落地**(信封 head/dataBody、规则脚本 payload 坑、下行单次序列化、HLC 事件因果序)。
-- **[`bifromq-plugin`](../bifromq-plugin/)** — ACL 复用 `MqttTopicMatcher`,事件侧用 `event.hlc()`(对应本 skill 的 `HybridLogicalClockUtil`)。
-
----
-
-> 📌 **最后核对**:`thinglinks-util-pro` · 2026-06-12。类名/方法签名随版本演进,落地前请核对真实代码 `com.mqttsnet.basic.*`。
+- `thinglinks-cloud`：协议、规则、缓存、消息等底座能力的业务落地。
+- `bifromq-plugin`：MQTT ACL topic 匹配与 broker 事件因果序。

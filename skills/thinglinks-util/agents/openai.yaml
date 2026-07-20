@@ -1,4 +1,4 @@
 interface:
-  display_name: "ThingLinks Util (framework foundation)"
-  short_description: "Work on thinglinks-util-pro: protocol codec (SM4/AES/sign), Groovy engine, core utils"
-  default_prompt: "Help me work on the ThingLinks util framework (protocol/groovy-engine/core)"
+  display_name: "ThingLinks Util"
+  short_description: "Develop protocol, script, cache, messaging, and core utilities"
+  default_prompt: "Use $thinglinks-util to guide a safe change in the ThingLinks framework foundation."

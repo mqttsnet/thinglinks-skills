@@ -27,6 +27,16 @@ EngineExecutorResult execute(String groovyMethodName, ScriptEntry scriptEntry, E
 - 脚本缓存 `ScriptRegistry` / `DefaultScriptRegistry`:Caffeine(Bean `thinglinksGroovyScriptEngineCache`,默认 600min),按 `ScriptEntry.uniqueKey` 存;DCL 线程安全,未命中经 `ScriptLoader` 懒加载。
 - `ScriptEntry{ scriptContext, fingerprint(内容指纹,变更检测), uniqueKey, lastModifiedTime, clazz }`;`ScriptQuery{ uniqueKey }`。
 
+## 安全边界
+
+`GroovyCompiler` 提供三层纵深防御：
+
+1. 编译前拒绝 `@ASTTest`、`@Grab*`、`groovy.grape` 等可在 `parseClass()` 阶段触发动作的源码。
+2. 在 `CANONICALIZATION` 阶段遍历 AST，拒绝进程、反射、文件、类加载、脚本引擎及部分 Spring 容器入口；动态方法名和危险方法指针也会拒绝。
+3. 注入 `@TimedInterrupt(5)`，限制常规方法与循环中的 CPU 死循环。
+
+这不是运行时强隔离：拒绝列表不能覆盖全部动态分发、阻塞 I/O、异步任务或资源耗尽；新 ClassLoader 只帮助类回收，不隔离应用 classpath。`DefaultEngineExecutor` 仍把真实 `applicationContext` 注入 Binding，因此只执行受控来源的脚本；不可信脚本必须放到受限进程或容器中。
+
 ## 结果 / 状态
 
 `EngineExecutorResult{ ExecutionStatus executionStatus, Object context(脚本返回值), Throwable exception, String errorMessage }`(`success(ctx)` / `failed(throwable|msg)` 工厂)。

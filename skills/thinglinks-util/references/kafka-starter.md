@@ -26,7 +26,7 @@ kafkaProducerService.thingLinksKafkaTemplateSendMsg(topic, key, msg);
 
 ## 事务策略(防回潮)
 
-事务是 **opt-in**:配 `transaction-id-prefix` 才开。开了的代价 = 强制 `acks=all` + `max.in.flight≤5` + 每次 send 走事务协调器,吞吐大降——事件投递场景**不要配**。历史教训:曾因 sender 上挂事务导致消费极慢。
+事务是 **opt-in**:配 `transaction-id-prefix` 才开。开了的代价 = 强制 `acks=all` + `max.in.flight≤5` + 每次 send 走事务协调器,吞吐大降;事件投递场景**不要配**。
 
 ## 生产参数基线(nacos kafka.yml)
 

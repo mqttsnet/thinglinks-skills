@@ -41,7 +41,9 @@
 
 ## 加解密底座(thinglinks-core)
 
-- `Sm4Utils`(`utils/sm`)/ `AesUtils`(`utils/aes`):`encryptWithCustom(plain, key, iv)` → HEX、`decryptWithCustom`;**CBC + PKCS5Padding**,密钥/IV 16/24/32 字节,基于 Hutool。`*WithDefaults` 用 `EncryptKeyManager`(`secure/config`)配置的密钥。
+- `Sm4Utils`(`utils/sm`)/ `AesUtils`(`utils/aes`):`encryptWithCustom(plain, key, iv)` → HEX、`decryptWithCustom`;均为 **CBC + PKCS5Padding**。SM4 key/IV 为 16 字节;AES key 为 16/24/32 字节、IV 固定 16 字节。`*WithDefaults` 从 `EncryptKeyManager`(`secure/config`)取配置。
+- AES 输入、配置或运算失败会抛异常;SM4 helper 当前失败返回空字符串,协议入口必须拒绝空的加密/解密结果。
+- `Sm4Utils` 默认构造路径当前读取的是 `EncryptKeyManager.Algorithm.AES`;依赖 `*WithDefaults` 前先核对或修正配置选择。协议 codec 的 custom key/IV 路径不经过该默认配置。
 - `ProtocolRegexTopicVariableExtractorUtils.extractVariables(input)`(`utils`):正则取 version + deviceId。
 
 依赖:protocol-starter → core(Sm4/Aes/SnowflakeId/EncryptKeyManager)+ Hutool + fastjson2 + Jackson + commons-codec。
