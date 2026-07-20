@@ -18,6 +18,7 @@
 - 请求 `DeviceAuthenticationQuery`:`clientIdentifier`(`{雪花}@{租户}`)、`username`、`password`、`protocolType`(MQTT/WEBSOCKET)、`authMode`、SSL 时 `clientCertificate`。
 - **通过条件**:① 按 clientId 查到设备(`linkCacheDataHelper.getDeviceCacheVO`,否则"设备不存在")② `authMode` 与设备一致 ③ 状态不在断连集合 ④ **`username==设备.userName` 且 `password==设备.password`**(明文 equals)⑤ SSL 再验 CA。
 - 响应 `DeviceAuthenticationResultVO`:`certificationResult`(BifroMQ 看这个)、`errorMessage`、`deviceInfoResult`(productIdentification/signKey/encryptKey…)、`aclRuleListResult`、`tenantId`。
+- 连接认证与 ACL 预加载解耦:`authClient` 通过即设备合法;ACL 拉取失败可降级为空列表,真正 publish/subscribe 权限在 `clientAclValidation` 判定。
 
 ## 发布 / 订阅 ACL
 

@@ -4,9 +4,11 @@
 
 | 仓库 | 内容 | skill |
 | --- | --- | --- |
-| `thinglinks-cloud-pro-*`(主) | broker / mqs / rule / link / public 业务模块 | `thinglinks-cloud`(本) |
-| `thinglinks-util-pro`(框架) | `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | `thinglinks-util` |
-| `thinglinks-web-pro` | Vue3 前端控制台 | `thinglinks-web` |
+| Cloud 后端源码树 | broker / mqs / rule / link / public 业务模块 | `thinglinks-cloud`(本) |
+| Util 框架源码树 | `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | `thinglinks-util` |
+| Web 前端源码树 | Vue3 前端控制台 | `thinglinks-web` |
+
+检出目录名不是产品契约；产品身份、版本与同步边界以 Cloud 根目录 `.thinglinks-product.env` 为准，操作见 `system/product-configuration.md`。
 
 ## 本地启动
 
@@ -14,18 +16,19 @@
 
 | 模块 | 主类 | 端口 | 服务名 |
 | --- | --- | --- | --- |
-| broker | `BrokerServerApplication` | 18790 | thinglinks-broker |
-| mqs | `MqsServerApplication` | 18784 | thinglinks-mqs |
-| rule | `RuleServerApplication` | 18786 | thinglinks-rule |
-| link | `LinkServerApplication` | 18782 | thinglinks-link |
-| gateway | `GatewayServerApplication` | 18760 | thinglinks-gateway |
+| broker | `BrokerServerApplication` | 18790 | `thinglinks-broker-server` |
+| mqs | `MqsServerApplication` | 18784 | `thinglinks-mqs-server` |
+| rule | `RuleServerApplication` | 18786 | `thinglinks-rule-server` |
+| link | `LinkServerApplication` | 18782 | `thinglinks-link-server` |
+| gateway | `GatewayServerApplication` | 18760 | `thinglinks-gateway-server` |
 
-**依赖中间件**:Nacos(18848,配置/注册)、Kafka(上行事件流)、RocketMQ(桥接/告警/下行)、Redis(缓存/会话/指标)、TDengine(时序)、BifroMQ(MQTT broker,feign `…:8091`)、MySQL(元数据)。Nacos 上 `kafka.yml`/`rocketmq.yml`/`redis.yml`/`database.yml`。
+**依赖中间件**:Nacos(18848,配置/注册)、Kafka(上行事件流)、RocketMQ(桥接/告警/下行)、Redis(缓存/会话/指标)、TDengine(时序)、BifroMQ(MQTT broker,feign `…:8091`)、MySQL(元数据)。Nacos 上 `kafka.yml`/`rocketmq.yml`/`redis.yml`/`database.yml`。部署必须显式提供 `NACOS_NAMESPACE` / `SEATA_NAMESPACE`；它们不等于 MQ 命名空间。
 
-**起法**:`cd docker && docker-compose up -d` 一键拉全栈(`docker/docker-compose.yml`);或 IDE 跑各模块主类 + 指向本地 Nacos。`SPRING_PROFILES_ACTIVE=test`。
+**起法**:`cd docker && docker compose up -d` 一键拉全栈(`docker/docker-compose.yml`);或 IDE 跑各模块主类 + 指向本地 Nacos。`SPRING_PROFILES_ACTIVE=test`。
 
 ## 编译
 
+- 产品配置先跑 `scripts/tests/product-config-test.sh` + `scripts/product-config.sh check`；无 `.git` 的源码归档可执行后一个只读检查；
 - 后端 `mvn clean package -P test -DskipTests`(或 `-P prod`);整库校验用 IDEA MCP `build_project`;
 - **改了 util-pro 必须先 `mvn install` 到本地仓**,主库才拉得到新版本(否则用旧 jar);
 - 前端 `npx eslint --fix` + `npx eslint`。
@@ -35,6 +38,12 @@
 - `DeviceActionTypeEnum` 改 → bifromq-plugin-pro `EventTypeEnum` + DBA 字典 SQL + rule 规则 JSON + mqs README 第 7 节;
 - Kafka topic / `BridgeMessageEnvelope` 改 → 见 `references/extension-points.md`;
 - util-pro 的 `LampJacksonModule` / `SnowflakeIdUtil` / `MqttTopicMatcher` 是全局行为,改动影响所有下游(谨慎,细节见 `thinglinks-util` skill)。
+
+## XXL-Job 调度任务(`thinglinks-iot-executor` 的 `LinkJob`)
+
+XXL-Job 执行器在 `thinglinks-support`。链路相关 handler:`flushAnyTenantDeviceCacheJobHandler` / `flushAnyTenantProductCacheJobHandler` / `flushAnyTenantProductModelCacheJobHandler`(**缓存刷新仅做预热**)、`syncAnyTenantDeviceConnectionStatusJobHandler`、`processOtaUpgradeTasksJobHandler`。
+
+> **发布重试已拆为独立调度任务**:`@XxlJob("flushProductVersionPublishRetryJobHandler")` 调 facade `LinkJobHandlerFacade.retryProductVersionPublish(tenantId)`,与缓存预热解耦(故障互不影响、周期可单独加密,建议 2~5 分钟覆盖 1h 兜底窗口)。整条记录幂等 rerun 机制见 `iot/product-version-publish.md`。
 
 ## 提交规范(本仓约定)
 

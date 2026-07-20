@@ -14,7 +14,7 @@
    → DeviceDownlinkFacade.dispatch(DownlinkCommand)
         ├ boot 部署:进程内直调 → DeviceDownlinkDispatchService
         └ cloud 部署:DeviceDownlinkApi(@FeignClient thinglinks-broker-server)
-                       → POST /anyUser/deviceDownlinkOpen/dispatch → DeviceDownlinkController → DeviceDownlinkDispatchService
+                       → POST /inner/deviceDownlinkOpen/dispatch → DeviceDownlinkController → DeviceDownlinkDispatchService
    → DeviceDownlinkDispatchService 按 protocolType 选 sender(空/未知 → 兜底 MQTT)
         ├ MQTT      → MqttDownlinkSender      → MqttBrokerService.publishMessage      → BifroMQ /pub
         ├ WEBSOCKET → WebSocketDownlinkSender → WebSocketBrokerService.publishMessage → RocketMQ 广播 → 持有节点 socket(见 ws-downlink-broadcast.md)
@@ -31,7 +31,7 @@
 | `DeviceDownlinkFacade`(接口) | broker-api `com.mqttsnet.thinglinks.broker` | 唯一方法 `R<?> dispatch(DownlinkCommand)` |
 | `DeviceDownlinkFacadeImpl`(boot) | broker-boot-impl | 单体部署:直调 `DeviceDownlinkDispatchService` |
 | `DeviceDownlinkFacadeImpl`(cloud) | broker-cloud-impl | 微服务部署:走 Feign `DeviceDownlinkApi`(两个同名实现,按部署只上一个) |
-| `DeviceDownlinkApi`(`@FeignClient`) | broker-cloud-impl `broker.api` | `name=thinglinks-broker-server`、`path=/anyUser/deviceDownlinkOpen`、`POST /dispatch`、带 fallback |
+| `DeviceDownlinkApi`(`@FeignClient`) | broker-cloud-impl `broker.api` | `name=thinglinks-broker-server`、`path=/inner/deviceDownlinkOpen`、`POST /dispatch`、带 fallback |
 | `DeviceDownlinkController` | broker-controller | 收 Feign → `DeviceDownlinkDispatchService.dispatch` |
 | `DeviceDownlinkDispatchService` | broker-biz `broker.downlink` | **真派发器**:启动期建 `Map<protocol→DownlinkChannelSender>`,按 `protocolType`(大写)选;空/未知 **兜底 MQTT**;sender 异常收进 `R.fail` |
 | `DownlinkChannelSender`(接口 SPI) | broker-biz `broker.downlink` | `supportedProtocol()` + `send(DownlinkCommand)`;实现 `MqttDownlinkSender` / `WebSocketDownlinkSender` / `TcpDownlinkSender` |
@@ -39,6 +39,7 @@
 
 - **协议常量** `DownlinkProtocols`:`MQTT` / `WEBSOCKET` / `TCP`,对齐 `ProtocolTypeEnum.getValue()`;协议由 `resolveProtocolType(productId, boundVersionNo)` 推出再塞进 `DownlinkCommand`。
 - **调用点**:link `DeviceCommandServiceImpl.buildAndSendMessage`(注入 `DeviceDownlinkFacade`);mqs `AbstractMessageHandler.sendMessage`(被 9 个上行应答 handler 复用:TimeSync / Ota* / SecretKey / *SubDevice / QueryDevice / Chatgpt…)。
+- **访问边界**:`/inner/deviceDownlinkOpen` 是服务间接口,经网关访问应被拒绝;控制台下发走 `/link/deviceCommand/issueCommands`。
 - **重构前 vs 后**:协议分支原本内联在调用方(link 旧私有 `sendMessage`/`sendWebSocketMessage` 的 if/else),现已收敛进 `DeviceDownlinkDispatchService`。**不存在**"旧 broker-api `@Component` 派发器"——c74a4f48 删的那批 `@Component` 是 WS 集群类(`SessionOwnerRegistry` 等,见 `ws-downlink-broadcast.md`),与下行命令无关。
 - WS 协议的投递细节(广播扇出 + 持有节点投递)见 **`ws-downlink-broadcast.md`**。
 
@@ -50,6 +51,8 @@
 | OTA 命令 | `/{version}/devices/{deviceId}/topo/otaCommand` | `OtaTaskExecutionHandler.generateResponseTopic`(行 155-157) |
 
 > 子设备用 `gatewayId` 代替 `deviceIdentification`。`sdkVersion` 如 `v1` → `/v1/devices/xxx/command`。
+>
+> **OTA ≠ 仅下行**:OTA 还有上行侧动作 —— 升级成功 / 设备版本上报会触发 `OtaModelVersionSwitcher` 把设备绑定产品版本迁到升级包配置的目标(影子)版本(幂等 + fail-soft,不打断 OTA 主流程),详见 `iot/ota.md`。
 
 ## ⚠️ 单次序列化(避免多层转义)
 

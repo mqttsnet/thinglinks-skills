@@ -1,4 +1,4 @@
 interface:
   display_name: "ThingLinks Web (frontend console)"
-  short_description: "Develop the thinglinks-web-pro console: Vue3 + Vben, IoT pages, API, components, i18n"
-  default_prompt: "Help me develop the ThingLinks web console (Vue3 + Vben)"
+  short_description: "Develop ThingLinks Web pages, notifications, product builds, browser configuration, and frontend security"
+  default_prompt: "Help me develop or troubleshoot the ThingLinks Web console using its current source contracts"

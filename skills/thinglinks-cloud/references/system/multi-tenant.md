@@ -6,6 +6,10 @@
 
 baomidou `dynamic-datasource`。请求头带租户 → `HeaderThreadLocalInterceptor`(`thinglinks-sa-token-ext`)塞进 `ContextUtil`(ThreadLocal)→ SQL 前 `DsThreadProcessor` 读 `ContextUtil` 解析池名 `"{prefix}_{tenantId}"`。每租户库由 `tenant/service/DataSourceService` + `InitDatabaseOnStarted.createDatabase(tenantId)` 建(前缀 `thinglinks_base` / `thinglinks_extend`)。
 
+> **建库 DDL 须放行拦截器**:`InitDatabaseMapper`(`thinglinks-tenant-datasource-init`)+ `TDengineMapper`(`thinglinks-tds-biz`)都标 `@InterceptorIgnore(blockAttack="true", illegalSql="true", …)`。多方言建库/建超表 DDL(`CREATE DATABASE`/`CREATE USER`/`GRANT`/达梦·SQLServer 方言)映射成 `<update>/<delete>` 会被 `BlockAttackInnerInterceptor` 当 UPDATE/DELETE 用 JSqlParser 解析,而这些非标准 DDL 解析不了 → 不放行则新建租户建库失败。
+>
+> **租户库初始化 SQL**(`thinglinks-tenant-datasource-init/src/main/resources/schema/{mysql,dm}/thinglinks_base.sql`)随版本发布/OTA 新增列:`ota_upgrades.product_version_no`(目标产品版本号)、`product_publish_record.{canary_result_json(策略执行结果快照), retry_count, max_retry_count}`。字段语义见 `iot/product-version-publish.md` / `iot/ota.md`。
+
 ## 2. 列租户线(行内 tenant 列)
 
 Mybatis-Plus 租户拦截器,**仅在 `DATASOURCE_COLUMN`/`COLUMN` 装配**(`MybatisAutoConfiguration.getPaginationBeforeInnerInterceptor`):`LampTenantLineInnerInterceptor`,**列名 `created_org_id`**、**值 = `ContextUtil.getCurrentCompanyId()`(组织/公司 id,非原始 tenantId)**,带 `ignoreTable`/`ignoreTablePrefix` 排除。

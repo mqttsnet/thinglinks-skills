@@ -1,66 +1,65 @@
 ---
 name: bifromq-plugin
 description: >
-  Use when developing the ThingLinks BifroMQ MQTT broker plugins repo bifromq-plugin-pro
-  (com.mqttsnet.thinglinks, BifroMQ 3.3.5 SPI): the auth-provider plugin (IAuthProvider —
-  device connect authentication + publish/subscribe ACL with fast-path metadata rules,
-  HTTP fallback, Caffeine cache, MqttTopicMatcher + placeholder replacement), the
-  event-collector plugin (IEventCollector — report() → EventTypeEnum → Kafka topics feeding
-  mqs, connect/close/kicked/ping/sub/pub/dist events), the setting-provider plugin
-  (ISettingProvider, -Dsetting_provide_init_value=true), or the resource-throttler plugin
-  (IResourceThrottler). Trigger whenever the user works on BifroMQ auth/ACL, device
-  connect/disconnect events, the EventTypeEnum ↔ DeviceActionTypeEnum mapping, Kafka event
-  topics, or deploying plugins into BifroMQ (standalone.yml FQN).
+  Use when modifying, reviewing, configuring, packaging, or troubleshooting the
+  ThingLinks BifroMQ 3.3.5 plugins in bifromq-plugin-pro, including authentication
+  and ACL, Kafka event routing, setting/resource providers, plugin logging and
+  configuration loading, standalone.yml registration, compatibility versions,
+  or release ZIP contents.
 ---
 
-# BifroMQ Plugin (broker plugins)
+# ThingLinks BifroMQ Plugin
 
-`bifromq-plugin-pro`:ThingLinks 给 **BifroMQ**(MQTT broker)写的插件库。Maven + Java 17,BifroMQ **3.3.5**(包 `com.baidu.bifromq.*`;升 4.0 要换成 `org.apache.bifromq.*`)。包名 `com.mqttsnet.thinglinks`。
+Four Java 17 PF4J plugins target BifroMQ 3.3.5. Auth, event, and setting code uses
+`com.baidu.bifromq.*`; do not copy 4.x `org.apache.bifromq.*` examples here.
 
-## 四个插件(各实现一个 BifroMQ SPI)
+## Components
 
-| 插件 | BifroMQ SPI | 职责 |
+| Module | SPI | Current responsibility |
 | --- | --- | --- |
-| `bifromq-auth-provider-plugin` | `IAuthProvider` | 设备认证(账号/证书)+ 发布/订阅 **ACL** |
-| `bifromq-event-collector-plugin` | `IEventCollector` | 采集 BifroMQ 事件 → 映射 → 写 **Kafka**(喂 mqs) |
-| `bifromq-setting-provider-plugin` | `ISettingProvider` | 运行时租户级配置(同步只读内存) |
-| `bifromq-resource-throttler-plugin` | `IResourceThrottler` | 多租户资源限流 |
+| `bifromq-auth-provider-plugin` | `IAuthProvider` | MQTT 3/5 authentication and PUB/SUB/UNSUB ACL |
+| `bifromq-event-collector-plugin` | `IEventCollector` | broker events to Kafka for `thinglinks-mqs` |
+| `bifromq-setting-provider-plugin` | `ISettingProvider` | in-memory broker settings |
+| `bifromq-resource-throttler-plugin` | `IResourceThrottler` | SPI wiring; current provider does not enforce limits |
 
-## 它在平台里的位置
+## Working Rules
 
-```
-设备 ── MQTT ──> BifroMQ ──(本插件)──> ① IAuthProvider 认证+ACL  ──HTTP──> thinglinks-link(:18760 deviceOpen)
-                              └──────> ② IEventCollector 事件 ──Kafka──> thinglinks-mqs(上行/连接/断开…)
-```
-即:**broker 侧的"门卫(ACL/认证)+ 事件出口(Kafka)"**。上行业务在 mqs(见 `thinglinks-cloud` skill),这里是它的**源头**。
+1. Identify synchronous broker callbacks; never add blocking I/O to setting,
+   throttling, or ACL metadata matching.
+2. Trace effective configuration first. `classpath:/config.yaml` and
+   `./conf/standalone.yml` are not deep-merged.
+3. Review `EventType`, topic, body action, headers, and downstream mqs together.
+4. Run the product, logging, build, and ZIP-content gates before publishing.
 
-## ⚠️ 重要(反幻觉/部署铁律)
+## Critical Boundaries
 
-- **BifroMQ 版本 3.3.5**:包名 `com.baidu.bifromq.*`;别按 4.0(`org.apache.bifromq.*`)写。
-- **`-Dsetting_provide_init_value=true` 必须加**到 BifroMQ 启动参数,否则 setting-provider 配置全失效(且 `PING_REQ` 心跳采集不到)。
-- ACL 决策**禁止阻塞 BifroMQ event loop**:CPU 工作丢 executor、HTTP 用异步、结果走 Caffeine 缓存。
-- 事件 `report()` 入口**同步抓 `event.hlc()` + `event.utc()`** 保因果顺序,再异步处理。
-- ACL 通配/占位符复用 util 的 `MqttTopicMatcher` + `AclTopicPatternPlaceholderReplacer`(`{deviceId}`/`{productId}`/`{clientId}`)。
-- 类名/行号随版本演进,核对真实代码 `com.mqttsnet.thinglinks.*`。
+- Authentication failures deny access. ACL metadata errors fall back to async
+  HTTP; non-200 responses and exceptions deny. Disabled ACL and allowlisted
+  tenants are explicit bypasses.
+- `refreshAfterWrite` exists in ACL configuration but is not applied by the
+  current Caffeine builder; do not claim background refresh.
+- Capture `event.hlc()` and `event.utc()` in `report()` before asynchronous
+  dispatch. The 64-worker queue is unbounded and does not provide backpressure.
+- `-Dsetting_provide_init_value=true` enables custom settings and `PING_REQ`.
+  Settings are global; `hasResource()` returns `true`, so limits are not enforced.
+- Never log full YAML/config objects, passwords, certificates, ACL metadata,
+  tokens, or JAAS strings. Per-event success logs must not remain at `INFO` on
+  high-throughput paths.
+- Logback uses a shared `LoggerContext`; reset can affect broker and sibling logs.
+  It is not isolated per-plugin logging.
 
 ## References Index
 
-| File | Content | When to read |
+| File | Content | Read when |
 | --- | --- | --- |
-| [references/auth-acl.md](references/auth-acl.md) | `IAuthProvider`:认证流程、ACL 快/慢路径、缓存、占位符 | 改设备认证 / 发布订阅鉴权 |
-| [references/event-collector.md](references/event-collector.md) | `IEventCollector`:report→EventType→Kafka topic、`EventTypeEnum` 映射 | 改事件采集 / Kafka topic / 新增事件 |
-| [references/setting-throttler.md](references/setting-throttler.md) | `ISettingProvider` + `IResourceThrottler` + `-D` 开关 | 改运行时配置 / 限流 |
-| [references/deploy-config.md](references/deploy-config.md) | 构建打包、config.yaml、装进 BifroMQ(standalone.yml FQN) | 部署 / 配置 |
+| [references/auth-acl.md](references/auth-acl.md) | authentication, ACL fast/fallback paths, cache truth | changing connect auth or PUB/SUB/UNSUB checks |
+| [references/event-collector.md](references/event-collector.md) | event map, Kafka contract, queue and delivery limits | changing broker events or mqs ingestion |
+| [references/setting-throttler.md](references/setting-throttler.md) | setting callback and current throttler behavior | changing broker settings or limits |
+| [references/deploy-config.md](references/deploy-config.md) | effective config sources and standalone registration | configuring or deploying plugins |
+| [references/runtime-safety.md](references/runtime-safety.md) | logging, sensitive data, shared context, hot paths | reviewing runtime or security changes |
+| [references/build-release.md](references/build-release.md) | product versions, build gates, ZIP allowlist | upgrading dependencies or preparing a release |
 
-## Assets
+## Asset
 
-`assets/standalone-register.yml` — BifroMQ `standalone.yml` 四插件 FQN 注册 + `-Dsetting_provide_init_value=true` 提示(复制即用)。
-
-## 相关 skill
-
-- **[`thinglinks-cloud`](../thinglinks-cloud/)** — mqs 消费本插件采集的事件(连接/断开/上行),下行经 broker 投递。
-- **[`thinglinks-util`](../thinglinks-util/)** — ACL 复用 `MqttTopicMatcher`;事件因果时钟对应 `HybridLogicalClockUtil`。
-
----
-
-> 📌 **最后核对**:`bifromq-plugin-pro`(BifroMQ 3.3.5)· 2026-06-08。类名/行号随版本演进,落地前请核对真实代码 `com.mqttsnet.thinglinks.*`。
+`assets/standalone-register.yml` contains the four provider FQNs and the required
+JVM flag without deployment credentials.
