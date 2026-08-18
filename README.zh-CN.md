@@ -7,7 +7,7 @@
 结构化、按需加载的知识包,让任意 AI Agent(Claude Code · Codex · Cursor)秒变 ThingLinks 专家。
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-4-brightgreen.svg)](#-技能列表)
+[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-技能列表)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -32,6 +32,7 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 | [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT 页面、defHttp API、路由权限、共享组件、规则脚本调试、规则联动通知、产品清单/构建门禁、浏览器配置安全、i18n 与开发准则。 |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker 插件 —— `bifromq-plugin-pro` | 认证与 ACL、Kafka 事件契约、setting/限流真实边界、运行时配置与日志安全、兼容版本、打包和部署。 |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | 工作区结构 —— 社区 monorepo ↔ 旗舰独立仓 | **仓库与路径定位。** 工程映射(cloud / web / bifromq-plugin / util)、治理文件归口、独立**版本线** + `bump-version.sh`、`changelogs/` 每版一文件、Nacos 模板**占位符规则**、永不提交清单、提交风格、**安全基线**(硬性指标检查表)。 |
+| [`thinglinks-ai`](./skills/thinglinks-ai/) | AI 服务 —— MCP 调度与运行时边界 | **用好和造好这个 MCP。** 什么问题选哪个工具、怎么串、返回字段到底是什么意思、什么绝对不能说(只读、身份服务端注入、组织级过滤不生效),场景工作流(设备离线、数据不更新、阈值复核、异常交叉验证、故障分诊),以及加工具的服务端规则。 |
 
 ## 🚀 安装
 
@@ -44,6 +45,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 ```
 
 装完后,Agent 会在相关场景**自动触发** —— 比如你提到 ThingLinks、规则脚本、设备上行/下行、物模型、设备影子、网关/鉴权/多租户、缓存与锁、敏感字段加密、Kafka/RocketMQ、流媒体/GB28181 或 BifroMQ 认证/ACL 时。
@@ -63,6 +65,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
 - `thinglinks-web` —— 9 篇 references(结构 / API / 路由权限 / 开发准则 / 组件 / 页面地图 / 脚本调试 / 联动通知 / 产品构建安全)
 - `bifromq-plugin` —— 6 篇 references(认证 ACL / 事件 / setting 与限流 / 部署 / 运行时安全 / 构建发行)
 - `thinglinks-workspace` —— 1 篇 reference(`security-baseline` 安全硬性指标)
+- `thinglinks-ai` —— 41 篇 reference(按域的工具调度、安全边界、场景工作流、服务端建设规则)+ 对账脚本
 
 ## 🏷️ 命名规范
 

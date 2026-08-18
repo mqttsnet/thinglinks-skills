@@ -7,7 +7,7 @@
 あらゆる AI エージェント(Claude Code · Codex · Cursor)を ThingLinks エキスパートに変える、構造化・オンデマンドのナレッジパック。
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-4-brightgreen.svg)](#-skills)
+[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-skills)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -32,6 +32,7 @@ Agent Skills は、特定ドメインの **深いオンデマンドコンテキ�
 | [`thinglinks-web`](./skills/thinglinks-web/) | フロントコンソール — Vue3 + Vben | IoT ページ、defHttp API、ルーティング/権限、共有コンポーネント、ルール通知、製品マニフェスト/ビルドゲート、ブラウザ設定の安全性、i18n と規約。 |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ ブローカープラグイン — `bifromq-plugin-pro` | 認証/ACL、Kafka イベント契約、setting/スロットリングの実装境界、実行時設定とログ安全性、互換バージョン、パッケージング、デプロイ。 |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | ワークスペース構成 — Community monorepo ↔ Enterprise 各リポジトリ | **リポジトリ/パス特定。** リポジトリ対応表、ガバナンスファイル配置、独立**バージョンライン** + `bump-version.sh`、`changelogs/` 方式、Nacos テンプレートの**プレースホルダ規則**、コミット禁止ファイル、コミット規約、**セキュリティベースライン**(必須チェックリスト)。 |
+| [`thinglinks-ai`](./skills/thinglinks-ai/) | AI サービス — MCP のツール選択と実行時ガードレール | **MCP を使いこなす/作る。** どの質問にどのツール、連携順序、返却フィールドの本当の意味、決して言ってはいけないこと(読み取り専用・サーバ側で注入される identity・組織レベルのフィルタが効かない点)、シナリオ別ワークフロー、ツール追加のサーバ側ルール。 |
 
 ## 🚀 インストール
 
@@ -44,6 +45,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 ```
 
 インストール後、関連する話題(ThingLinks、規則脚本、設備上行/下行、物モデル、デバイスシャドウ、BifroMQ auth/ACL、`mqs` / `rule` / `link` / `broker` モジュール等)に触れると skill が **自動起動** します。

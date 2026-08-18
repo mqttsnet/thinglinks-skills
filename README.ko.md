@@ -7,7 +7,7 @@
 모든 AI 에이전트(Claude Code · Codex · Cursor)를 ThingLinks 전문가로 만드는 구조화된 온디맨드 지식 팩.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-4-brightgreen.svg)](#-skills)
+[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-skills)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -32,6 +32,7 @@ Agent Skills 는 특정 도메인에 대한 **깊고 온디맨드한 컨텍스�
 | [`thinglinks-web`](./skills/thinglinks-web/) | 프론트 콘솔 — Vue3 + Vben | IoT 페이지, defHttp API, 라우팅/권한, 공유 컴포넌트, 룰 알림, 제품 매니페스트/빌드 게이트, 브라우저 설정 보안, i18n과 컨벤션. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ 브로커 플러그인 — `bifromq-plugin-pro` | 인증/ACL, Kafka 이벤트 계약, setting/스로틀링의 실제 경계, 런타임 설정과 로그 보안, 호환 버전, 패키징 및 배포. |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | 워크스페이스 구조 — Community monorepo ↔ Enterprise 리포지토리 | **리포지토리/경로 탐색.** 리포지토리 매핑, 거버넌스 파일 배치, 독립 **버전 라인** + `bump-version.sh`, `changelogs/` 방식, Nacos 템플릿 **플레이스홀더 규칙**, 커밋 금지 파일, 커밋 규약, **보안 베이스라인**(필수 체크리스트). |
+| [`thinglinks-ai`](./skills/thinglinks-ai/) | AI 서비스 — MCP 오케스트레이션 및 런타임 가드레일 | **MCP 활용과 구축.** 어떤 질문에 어떤 도구를 쓰는지, 연결 순서, 반환 필드의 실제 의미, 절대 말해서는 안 되는 것(읽기 전용, 서버 주입 신원, 조직 레벨 필터 미적용), 시나리오 워크플로, 도구 추가 서버 규칙. |
 
 ## 🚀 설치
 
@@ -44,6 +45,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 ```
 
 설치 후, 관련 주제(ThingLinks, 규칙 스크립트, 디바이스 업/다운링크, 사물 모델, 디바이스 섀도우, BifroMQ auth/ACL, `mqs` / `rule` / `link` / `broker` 모듈 등)를 언급하면 skill 이 **자동 트리거** 됩니다.
