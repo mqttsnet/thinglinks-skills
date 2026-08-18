@@ -17,6 +17,8 @@ skills/<name>/
 ├── SKILL.md            # index: overview + References Index + anti-hallucination + 最后核对 footer
 ├── references/*.md     # one subtopic per file, loaded on demand
 ├── assets/             # copy-paste starters (optional)
+├── evals/              # behavioural test cases (optional)
+├── lint.json           # purity rules enforced by CI (optional)
 └── agents/openai.yaml  # cross-tool interface (Codex / OpenAI agents)
 ```
 
@@ -28,7 +30,9 @@ Run the validator — CI runs the exact same check:
 node scripts/validate.mjs
 ```
 
-It verifies, per skill: frontmatter (`name` matches the directory + a non-trivial `description`), every References Index link resolves (no dangling links), and every `references/*.md` is linked from the index (no orphans).
+It verifies, per skill: frontmatter (`name` matches the directory + a non-trivial `description`), every References Index link resolves (no dangling links), every `references/*.md` is linked from the index (no orphans), and — when the skill ships a `lint.json` — that the directories it declares stay free of the patterns it forbids.
+
+`lint.json` is how a skill states a boundary it cannot afford to lose to human vigilance. Example: `thinglinks-ai` serves part of its references to end users at runtime, so those directories must not carry class names, module paths or SQL.
 
 Then:
 

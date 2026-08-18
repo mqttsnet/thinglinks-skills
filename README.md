@@ -7,7 +7,7 @@
 Structured, on-demand knowledge packs that turn any AI agent (Claude Code · Codex · Cursor) into a ThingLinks expert.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-4-brightgreen.svg)](#-skills)
+[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-skills)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -32,6 +32,7 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT pages, defHttp APIs, routing/permission, shared components, rule-script debug, rule-linkage notifications, product manifest/build gates, browser configuration security, i18n and conventions. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | Auth/ACL, Kafka event contracts, setting/throttler realities, runtime config and logging safety, compatibility versions, packaging, and deployment. |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | workspace layout — Community monorepo ↔ Enterprise repos | **Repo & path locator.** Repo-to-repo mapping (cloud / web / bifromq-plugin / util), governance-file placement, independent **version lines** + `bump-version.sh`, `changelogs/` per-release layout, Nacos template **placeholder rules**, never-commit local files, commit style, **security baseline** (hard-requirements checklist). |
+| [`thinglinks-ai`](./skills/thinglinks-ai/) | AI service — MCP orchestration & runtime guardrails | **Using and building the MCP server.** Which tool answers which question, how to chain them, what each returned field actually means, what must never be claimed (read-only, server-injected identity, org-level filtering that does not apply), scenario workflows (device offline, data stalled, threshold audit, anomaly cross-check, fault triage), plus server-side rules for adding tools. |
 
 ## 🚀 Install
 
@@ -44,6 +45,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-workspace -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 ```
 
 Once installed, a skill **auto-triggers** in your agent when relevant — e.g. when you mention ThingLinks, rule scripts, device uplink/downlink, thing models, device shadow, gateway/auth/multi-tenant, cache/locks, sensitive-field encryption, Kafka/RocketMQ, GB28181 video, BifroMQ auth/ACL, or the corresponding modules.
@@ -63,6 +65,7 @@ Once installed, a skill **auto-triggers** in your agent when relevant — e.g. w
 - `thinglinks-web` — 9 references (structure / api / routing-permission / conventions / components / IoT pages / script debug / rule notifications / product-build security)
 - `bifromq-plugin` — 6 references (auth-ACL / events / setting-throttler / deployment / runtime safety / build-release)
 - `thinglinks-workspace` — 1 reference (`security-baseline` hard-requirements checklist)
+- `thinglinks-ai` — 41 references (orchestration by domain, boundaries, scenario workflows, server build rules) + drift-check script
 
 ## 🏷️ Naming convention
 

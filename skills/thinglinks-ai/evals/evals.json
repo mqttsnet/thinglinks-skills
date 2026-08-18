@@ -1,0 +1,93 @@
+{
+  "skill_name": "thinglinks-ai",
+  "note": "行为用例。每条给出会诱发错误答法的工具返回形状,断言写的是「答案里必须成立什么」。取值为占位,不含任何真实租户数据。",
+  "evals": [
+    {
+      "id": 1,
+      "name": "shadow-all-null-not-offline",
+      "prompt": "这台设备的数据怎么一直是空的?deviceIdentification 是 DEV-0001",
+      "fixture": {
+        "get_device": {"connectStatus": 2, "connectStatusDesc": "离线", "lastHeartbeatTime": "2026-07-29 12:31:41"},
+        "get_device_shadow": {"serviceCount": 12, "propertyCount": 289, "allPropertyValuesNull": true}
+      },
+      "expected_output": "指出属性全空说明从未成功上报,与离线是两件事,并指向物模型编码或上报主题",
+      "assertions": [
+        "没有把「属性取值为空」当作设备离线的证据",
+        "区分了「从未上报」与「这段时间没上报」",
+        "给出的下一步包含核对物模型属性编码或上报主题",
+        "没有建议换一个时间范围重试"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "permission-lookup-two-buckets",
+      "prompt": "谁能删除产品?",
+      "fixture": {
+        "who_has_permission": {"permissionExists": false, "grantedCount": 0, "adminCount": 2, "grantedEmployees": [], "adminEmployees": [{"realName": "A"}, {"realName": "B"}]}
+      },
+      "expected_output": "指出权限码可能写错需要确认,同时说明管理员仍然可以执行",
+      "assertions": [
+        "没有回答「没有人有这个权限」",
+        "提到了管理员那一批人仍可执行",
+        "指出权限码在平台里不存在,需要用户确认写法"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "audit-truncated-total",
+      "prompt": "最近谁改过东西?",
+      "fixture": {
+        "get_operation_audit": {"total": 1180, "truncated": true, "returnedRecords": 5, "recordTypes": ["查询", "查询", "查询", "查询", "查询"]}
+      },
+      "expected_output": "数量用 total,并指出返回的全是查询类操作说明没有发生修改",
+      "assertions": [
+        "说数量时用了 1180 而不是 5",
+        "指出结果里全是查询类操作,据此说明这段时间没有人做过修改",
+        "没有把截断后的清单当作全量"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "timeseries-table-missing",
+      "prompt": "帮我看看这台设备上周的温度平均值",
+      "fixture": {
+        "get_metric_stats": {"isError": true, "message": "时序区间统计失败: 时序表 T-0001 不存在(库 DB-0001):该表尚未创建,或从未写入过数据"}
+      },
+      "expected_output": "把它当作结论:该设备从未有数据落库,并给出接入侧的排查方向",
+      "assertions": [
+        "没有把这条报错转述成「查询失败」或「工具有问题」",
+        "指出这台设备从未有数据落库",
+        "没有建议换一个时间范围重试"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "alarm-notification-unanswerable",
+      "prompt": "昨天那条高温告警的通知发出去了吗?",
+      "fixture": {
+        "get_alarm_records": {"total": 1, "deviceIdentityStructured": false},
+        "get_my_notifications": {"total": 3, "recentTitlesLookRelated": true}
+      },
+      "expected_output": "说明平台不记录告警与站内信的关联,不用时间接近推断",
+      "assertions": [
+        "明确说明平台不记录这个关联",
+        "没有用时间相近的站内信推断这条告警的通知已发出",
+        "给出了到控制台确认的替代路径"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "shadow-snapshot-not-interval",
+      "prompt": "这台设备最近一小时的电压是多少?",
+      "fixture": {
+        "get_device_shadow": {"startTime": "带时间段", "records": "区间内 40 条原始上报行", "propertyValue": "28.6", "unit": "V"}
+      },
+      "expected_output": "用原始行描述整段区间,不用快照值代表一小时",
+      "assertions": [
+        "没有用单个快照值 28.6V 描述整个一小时",
+        "基于区间内的原始上报行给出范围或统计",
+        "说明了依据多少个上报点"
+      ]
+    }
+  ]
+}

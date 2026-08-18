@@ -6,6 +6,8 @@
  *   1. SKILL.md has frontmatter with `name` (matching the dir) and a non-trivial `description` (the trigger).
  *   2. Every `references/<x>.md` linked from SKILL.md actually exists (no dangling links).
  *   3. Every file in `references/` is linked from SKILL.md (no orphan references).
+ *   4. Optional `lint.json` purity rules hold — declared per skill, e.g. reference
+ *      directories that must not leak implementation details (class names, SQL, module paths).
  *
  * Zero external dependencies — run with `node scripts/validate.mjs`.
  * Exit code 0 = all valid, 1 = problems found (used by CI).
@@ -95,6 +97,51 @@ for (const name of skills) {
       }
     };
     walk(refDir);
+  }
+
+  // 4) optional purity rules — a skill may declare directories that must stay free of
+  //    implementation detail (see lint.json). Nothing to do when the file is absent.
+  const lintPath = join(dir, 'lint.json');
+  if (existsSync(lintPath)) {
+    let lint;
+    try {
+      lint = JSON.parse(readFileSync(lintPath, 'utf8'));
+    } catch (e) {
+      fail(`${name}: lint.json is not valid JSON — ${e.message}`);
+      lint = null;
+    }
+    for (const rule of lint?.purity ?? []) {
+      const patterns = (rule.forbid ?? []).map((p) => new RegExp(p));
+      let violations = 0;
+      for (const rel of rule.paths ?? []) {
+        const base = join(dir, rel);
+        if (!existsSync(base)) {
+          fail(`${name}: lint.json purity path ${rel} does not exist`);
+          continue;
+        }
+        const scan = (d) => {
+          for (const e of readdirSync(d, { withFileTypes: true })) {
+            const p = join(d, e.name);
+            if (e.isDirectory()) {
+              scan(p);
+              continue;
+            }
+            if (!e.name.endsWith('.md')) continue;
+            const lines = readFileSync(p, 'utf8').split('\n');
+            lines.forEach((line, i) => {
+              const hit = patterns.find((re) => re.test(line));
+              if (hit)
+                fail(
+                  `${name}: ${p.slice(dir.length + 1)}:${i + 1} matches forbidden ${hit} — ${rule.reason ?? 'purity rule'}`
+                );
+              if (hit) violations++;
+            });
+          }
+        };
+        scan(base);
+      }
+      if (!violations) pass(`purity: ${(rule.paths ?? []).join(', ')}`);
+    }
   }
 }
 

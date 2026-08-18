@@ -1,0 +1,4 @@
+interface:
+  display_name: "ThingLinks AI (MCP orchestration & boundaries)"
+  short_description: "Pick the right ThingLinks MCP tool, chain it correctly, and never claim what the platform cannot answer"
+  default_prompt: "Use $thinglinks-ai to diagnose this through the ThingLinks MCP tools."
