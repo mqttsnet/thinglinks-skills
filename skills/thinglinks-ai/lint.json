@@ -1,0 +1,9 @@
+{
+  "purity": [
+    {
+      "paths": ["references/orchestration", "references/boundaries", "references/workflows"],
+      "forbid": ["com\\.mqttsnet", "\\.java\\b", "\\bSELECT \\b", "\\bINSERT \\b", "\\bUPDATE \\b.*\\bSET\\b", "thinglinks-[a-z]+-(biz|server|entity|controller)"],
+      "reason": "面向客户的运行时篇目只谈字段与结论,实现细节属于 references/server/"
+    }
+  ]
+}
