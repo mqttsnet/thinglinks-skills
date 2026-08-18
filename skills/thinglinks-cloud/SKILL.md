@@ -14,9 +14,9 @@ description: >
   boot/cloud Facade duality, `/inner/**` internal API governance, and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
   created_org_id tenant line), product manifest rendering, MQ namespace derivation, and Nacos/Seata
   deployment namespaces. (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
-  RTP). (4) Security/runtime governance: TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
+  RTP). (4) Security/runtime governance: the AI/MCP service (thinglinks-ai: MCP credential filter, `/inner/mcp/**` downstream contract), TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
   internal Feign endpoints, ACL cache/runtime debugging. Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
-  网关/鉴权/Sa-Token, 多租户, `/inner`, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
+  网关/鉴权/Sa-Token, 多租户, `/inner`, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, MCP/AI 服务/内部接口, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
   gateway/oauth/system/base/broker/mqs/rule/link/video modules — even without saying "ThingLinks".
 ---
 
@@ -37,6 +37,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | `thinglinks-base` | 租户级 `Base*` 业务(组织/员工/角色/字典/文件/消息/操作日志) |
 | `thinglinks-public`(common/-config) | 共享属性·MQ 路由常量·缓存 key、鉴权放行表、Mybatis 租户/数据权限拦截器、动态数据源 |
 | `thinglinks-sop-gateway` / `thinglinks-support` | 开放平台网关(ISV 签名)/ 监控 + XXL-Job 执行器 |
+| `thinglinks-ai` | MCP Server:把平台与 IoT 数据以只读工具开放给外部 AI 客户端 |
 
 ### 物联网 IoT(`references/iot/`)
 | 模块 | 职责 |
@@ -64,6 +65,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [system/auth.md](references/system/auth.md) | Sa-Token 登录/令牌、授权类型、登录流程、网关校验 + header 信任 | 改登录/认证/权限 |
 | [system/multi-tenant.md](references/system/multi-tenant.md) | DATASOURCE_COLUMN:动态数据源 + `created_org_id` 列租户线 + 数据权限;Def* vs Base* | 改多租户/数据隔离 |
 | [system/product-configuration.md](references/system/product-configuration.md) | 产品清单、版本渲染、MQ 路由派生、Nacos/Seata 运行命名空间、跨发行同步边界 | 改版本/产品配置/MQ 前缀/部署命名空间 |
+| [system/ai-mcp-service.md](references/system/ai-mcp-service.md) | AI 服务(MCP)接入链路:网关凭证过滤器与 header 重写、下游 `/inner/mcp/*` 专用 controller、`XxxMcpResultVO`/Converter 分层、数据权限显式开 | 为 MCP 加下游接口 / 改凭证链路 |
 
 ### 安全治理
 | File | Content | When to read |
@@ -132,6 +134,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 - **[`thinglinks-util`](../thinglinks-util/)** — 协议编解码、Groovy 引擎、HLC、core 工具、租户上下文/DB 插件的**实现**(`com.mqttsnet.basic.*`)。
 - **[`thinglinks-web`](../thinglinks-web/)** — 前端控制台 / 规则脚本调试面板 / 物模型编辑。
 - **[`bifromq-plugin`](../bifromq-plugin/)** — broker 侧 ACL/认证 + 事件采集(IoT 上行的源头,喂 mqs)。
+- **[`thinglinks-ai`](../thinglinks-ai/)** —— MCP 工具怎么选怎么串、回答边界与排查工作流;以及 `thinglinks-ai` 模块内部怎么加工具。
 
 ---
 
