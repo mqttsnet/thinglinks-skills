@@ -1,8 +1,9 @@
 name: skill-lint
 
 # Validate skill structure on every push / PR:
-# frontmatter (name + trigger description) and References Index integrity
-# (no dangling links, no orphan reference files).
+# frontmatter (name + trigger description), References Index integrity
+# (no dangling links, no orphan reference files), and any purity rules a skill
+# declares in its lint.json.
 
 on:
   push:
@@ -17,5 +18,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Validate skills (frontmatter + References Index)
+      - name: Validate skills (frontmatter + References Index + purity)
         run: node scripts/validate.mjs
