@@ -1,7 +1,7 @@
 ---
 title: 规则不触发或触发异常
 description: 用户说规则没生效、或规则跑得比预期频繁/稀少时
-requires: [list_rule_conditions, get_rule_trigger_stats, get_alarm_records, get_device]
+requires: [list_rules, list_rule_conditions, get_rule_trigger_stats, get_alarm_records, get_device]
 ---
 
 # 规则不触发或触发异常
@@ -14,12 +14,16 @@ requires: [list_rule_conditions, get_rule_trigger_stats, get_alarm_records, get_
 
 ## 一条都没触发
 
-1. `get_rule_trigger_stats` 看这条规则**跑没跑**。执行次数为 0 说明规则本身没被调度到,
-   问题不在阈值
-2. 跑了但没出告警,看 `list_rule_conditions` 的条件:阈值、比对的属性、生效的设备范围
-3. **按设备筛出 0 条不等于没有规则在盯它** —— 那只是没有专门为这台设备配的条件,
+1. `list_rules` 先看**规则开着吗、此刻在生效时段内吗**。
+   停用(`status=0`)、或已启用但 `effectiveNow=false`,规则根本不会跑 ——
+   这两种情况下后面几步全是白查,而它们恰恰是实际排查里最常见的原因。
+   顶层的 `disabledCount` / `outsideWindowCount` 先看这两个数
+2. `get_rule_trigger_stats` 看这条规则**跑没跑**。规则开着、也在生效时段,
+   执行次数仍为 0 才说明调度侧有问题
+3. 跑了但没出告警,看 `list_rule_conditions` 的条件:阈值、比对的属性、生效的设备范围
+4. **按设备筛出 0 条不等于没有规则在盯它** —— 那只是没有专门为这台设备配的条件,
    改按产品查才看得全
-4. 确认设备在上报:数据都没有,规则自然不会命中,回
+5. 确认设备在上报:数据都没有,规则自然不会命中,回
    [iot/data-not-updating](../iot/data-not-updating.md)
 
 ## 「失败了多少次」这个问题答不了
