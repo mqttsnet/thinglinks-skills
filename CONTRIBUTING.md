@@ -30,9 +30,24 @@ Run the validator — CI runs the exact same check:
 node scripts/validate.mjs
 ```
 
-It verifies, per skill: frontmatter (`name` matches the directory + a non-trivial `description`), every References Index link resolves (no dangling links), every `references/*.md` is linked from the index (no orphans), and — when the skill ships a `lint.json` — that the directories it declares stay free of the patterns it forbids.
+It verifies, per skill:
+
+- frontmatter — `name` matches the directory, `description` is non-trivial (it is the auto-trigger);
+- every References Index link resolves (no dangling links) and every `references/*.md` is linked from the index (no orphans);
+- every **relative markdown link** (`](../x.md)`) resolves — cross-skill links rot silently when a file moves;
+- every **bare `references/<x>.md` path written in prose** resolves. The index check only sees markdown-link form, so reorganising `references/` into subdirectories used to leave these pointing at nothing;
+- every workflow's front-matter `requires: [tool, ...]` name is mentioned somewhere under `references/orchestration/` — a typo there declares a dependency on a tool the routing layer never describes;
+- when the skill ships a `lint.json`, that the directories it declares stay free of the patterns it forbids.
 
 `lint.json` is how a skill states a boundary it cannot afford to lose to human vigilance. Example: `thinglinks-ai` serves part of its references to end users at runtime, so those directories must not carry class names, module paths or SQL.
+
+### Other repo-level scripts
+
+`scripts/pack-playbooks.mjs` bundles the `thinglinks-ai` runtime playbooks into one pasteable text blob for a hosted runtime (it does not touch Nacos and needs no credentials — pushing is a human step). Run it after changing `skills/thinglinks-ai/references/workflows/**`, since it refuses to pack a page whose body contains its own separator markers:
+
+```bash
+node scripts/pack-playbooks.mjs
+```
 
 Then:
 

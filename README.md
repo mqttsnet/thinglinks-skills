@@ -27,8 +27,8 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 
 | Skill | Repository | What it helps you do |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink, thing-model, TDengine + shadow, ACL, WS broadcast. *System:* WebFlux gateway, Sa-Token, internal APIs, DATASOURCE_COLUMN multi-tenant, product manifest/MQ namespace, Nacos/Seata deployment. *Video:* GB28181 (ZLMediaKit). |
-| [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — protocol / script / cache / messaging / core | Protocol **codec**, Groovy execution and safety boundaries, typed **cache-aside and locks**, Kafka/RocketMQ, databridge SPI, sensitive-field encryption, IDs/Jackson/topic/HLC utilities, and build/release rules. |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink, thing-model, TDengine + shadow, ACL, WS broadcast. *System:* WebFlux gateway, Sa-Token, internal APIs, service-to-service RPC (HTTP Interface vs Feign, by edition), DATASOURCE_COLUMN multi-tenant, product manifest/MQ namespace, Nacos/Seata deployment, XXL-Job scheduling. *Video:* GB28181 (ZLMediaKit). |
+| [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — protocol / script / cache / messaging / core | Protocol **codec**, Groovy execution and safety boundaries, typed **cache-aside and locks**, Kafka/RocketMQ, databridge SPI, sensitive-field encryption, IDs/Jackson/topic/HLC utilities, the **service-call foundation** (HTTP Interface wiring, connection pool, header propagation), **extend-database engines** (TDengine / ClickHouse / IoTDB), and build/release rules. |
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT pages, defHttp APIs, routing/permission, shared components, rule-script debug, rule-linkage notifications, product manifest/build gates, browser configuration security, i18n and conventions. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | Auth/ACL, Kafka event contracts, setting/throttler realities, runtime config and logging safety, compatibility versions, packaging, and deployment. |
 | [`thinglinks-workspace`](./skills/thinglinks-workspace/) | workspace layout — Community monorepo ↔ Enterprise repos | **Repo & path locator.** Repo-to-repo mapping (cloud / web / bifromq-plugin / util), governance-file placement, independent **version lines** + `bump-version.sh`, `changelogs/` per-release layout, Nacos template **placeholder rules**, never-commit local files, commit style, **security baseline** (hard-requirements checklist). |
@@ -57,15 +57,20 @@ Once installed, a skill **auto-triggers** in your agent when relevant — e.g. w
 ├── SKILL.md          # index: architecture overview + References Index + anti-hallucination guardrails
 ├── references/*.md   # focused subtopic docs, loaded on demand (progressive disclosure)
 ├── assets/           # copy-paste starters (where useful)
+├── scripts/          # drift / consistency checks (where useful)
 └── agents/openai.yaml# cross-tool interface (Codex / OpenAI agents)
 ```
 
-- `thinglinks-cloud` — 28 references across **`system/` · `security/` · `iot/` · `video/`** (including product configuration, internal API governance, runtime debugging, device access/testing) + 3 Groovy skeletons + Mermaid diagrams
-- `thinglinks-util` — 9 references (protocol / Groovy / cache / encryption / core / Kafka / RocketMQ / databridge / build-release)
+Repo-level tooling: `scripts/validate.mjs` (CI: frontmatter, References Index, relative and bare
+reference paths, workflow `requires`, per-skill `lint.json` purity) and `scripts/pack-playbooks.mjs`
+(bundles `thinglinks-ai` runtime playbooks into one pasteable text blob for a hosted runtime).
+
+- `thinglinks-cloud` — 31 references across **`system/` · `security/` · `iot/` · `video/`** (including service-to-service RPC, product configuration, internal API governance, job scheduling, runtime debugging, device access/testing) + 3 Groovy skeletons + Mermaid diagrams
+- `thinglinks-util` — 11 references (protocol / Groovy / cache / encryption / core / Kafka / RocketMQ / databridge / cloud-starter / tds extend-db / build-release)
 - `thinglinks-web` — 9 references (structure / api / routing-permission / conventions / components / IoT pages / script debug / rule notifications / product-build security)
 - `bifromq-plugin` — 6 references (auth-ACL / events / setting-throttler / deployment / runtime safety / build-release)
 - `thinglinks-workspace` — 1 reference (`security-baseline` hard-requirements checklist)
-- `thinglinks-ai` — 41 references (orchestration by domain, boundaries, scenario workflows, server build rules) + drift-check script
+- `thinglinks-ai` — 42 references (orchestration by domain, boundaries, scenario workflows, server build rules) + drift-check and evals-check scripts
 
 ## 🏷️ Naming convention
 
@@ -73,10 +78,12 @@ Repo = namespace; **skill names map 1:1 to the platform's repositories** (no `-d
 
 | Skill | Repository |
 | --- | --- |
-| `thinglinks-cloud` | cloud business platform — `broker` / `mqs` / `rule` / `link` / `public` |
+| `thinglinks-cloud` | cloud business platform — `broker` / `mqs` / `rule` / `link` / `public` / `ai`, plus the XXL-Job scheduler that lives in its own repo |
 | `thinglinks-util` | framework foundation — protocol / script / cache / messaging / core |
 | `thinglinks-web` | frontend console — Vue3 |
 | `bifromq-plugin` | BifroMQ broker plugins — `bifromq-plugin-pro` |
+| `thinglinks-ai` | AI service — MCP orchestration, answering boundaries, and the MCP server itself |
+| `thinglinks-workspace` | not one repo — the map across both product lines |
 
 ## 🔗 Related projects
 
