@@ -125,6 +125,7 @@ description: >
 | [server/architecture.md](references/server/architecture.md) | 五模块、三层分工、下游 Service/Converter/Controller 约定、预留包 | 上手改这个服务 |
 | [server/protocol/transport.md](references/server/protocol/transport.md) | 无状态传输的理由、端点三处同步、SDK 版本、静态 Bearer 偏离 | 改协议或路径 |
 | [server/protocol/tool-registration.md](references/server/protocol/tool-registration.md) | instructions 同步约束、annotations、description 写法、错误消息 | 注册或修改工具 |
+| [server/protocol/resources.md](references/server/protocol/resources.md) | 资源原语:物模型资源的 URI 模板、与工具同源取数、读失败语义、加资源要同步什么 | 加/改 MCP 资源 |
 | [server/protocol/output-schema.md](references/server/protocol/output-schema.md) | 反射生成、强制校验、宽松策略、单测照不到的盲区 | 出参形状相关问题 |
 | [server/development/steps.md](references/server/development/steps.md) | 加一个工具的五步与必做验证 | 加工具 |
 | [server/development/hard-rules.md](references/server/development/hard-rules.md) | 八条会造成静默错误的硬规则 | 加工具前通读 |
@@ -136,7 +137,22 @@ description: >
 
 - `assets/playbook-template.md` —— 新增工作流的骨架,照着填
 - `scripts/check_tool_drift.py` —— 拉 `tools/list` 与 `orchestration/domains/*.md` 对账,
-  列出「代码有目录没写」与「目录写了代码没有」
+  列出「代码有目录没写」与「目录写了代码没有」。不传 `--url` 时只做静态检查
+- `scripts/check_evals.py` —— 校验 `evals/evals.json` 的 id 连续、name 不重复、
+  `covers` 指向真实篇目,并打印覆盖矩阵
+- **仓库根** `scripts/pack-playbooks.mjs` —— 把运行时篇目打成一份可直接粘进 Nacos 的纯文本,
+  供**托管侧**运行时按需取用(自建客户端直接装 skill,不需要这一步):
+
+  ```bash
+  node scripts/pack-playbooks.mjs                              # 只打 workflows,输出到 stdout
+  node scripts/pack-playbooks.mjs --out playbooks.txt          # 同时写文件
+  node scripts/pack-playbooks.mjs --include orchestration --include boundaries
+  ```
+
+  产物用 `=== origin: <commit> <时间> ===` 与 `=== path: <相对路径> ===` 分隔,
+  上限 80KB(Nacos 单配置 100KB,留出余量)。**正文里不能出现这两个标记**,
+  出现会把一篇劈成两半且后半没有 front matter,脚本会直接报错拦下。
+  脚本不访问 Nacos、不需要任何凭据,推送由人在后台完成。
 
 ## 扩展约定
 
@@ -165,5 +181,6 @@ description: >
 
 ---
 
-> **最后核对**:工具清单以运行中的 `tools/list` 为准;字段语义随版本演进,
+> 📌 **最后核对**:2026-08-22,36 个工具 + 1 个资源。
+> 工具清单以运行中的 `tools/list` 为准;字段语义随版本演进,
 > 落地前核对当前源码 `com.mqttsnet.thinglinks.ai.*` 与真实调用返回。
