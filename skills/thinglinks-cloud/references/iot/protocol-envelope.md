@@ -46,7 +46,7 @@ def dataSign = DigestUtils.sha256Hex(timeStamp + ":" + signKey).toLowerCase()
 ## 序列化坑(关键)
 
 1. **Long → String**:`com.mqttsnet.basic.jackson.LampJacksonModule` 全局注册 `addSerializer(Long.class, ToStringSerializer)`,rule 的 JSON 响应会把所有 Long 序列化成 String。规则脚本因此**必须 `JSON.toJSONString(payload)`** 让信封变成对外不透明的字符串,数值才保真。
-2. **双重序列化(下行)**:dataBody 出现多层 `\\\"` = 对**已序列化的 JSON 串又 `toJSONString` 一次**。`buildResponse` 明文时会 `isTypeJSON ? readValue : ...` 把单次序列化的 JSON 串还原成对象;传双重的就会留一层转义。**只序列化一次**。见 `references/downlink-command.md`。
+2. **双重序列化(下行)**:dataBody 出现多层 `\\\"` = 对**已序列化的 JSON 串又 `toJSONString` 一次**。`buildResponse` 明文时会 `isTypeJSON ? readValue : ...` 把单次序列化的 JSON 串还原成对象;传双重的就会留一层转义。**只序列化一次**。见 `downlink-command.md`。
 
 ## buildResponse(下行用)
 

@@ -37,7 +37,7 @@ flowchart TB
   end
   DC --> F[DeviceDownlinkFacade.dispatch]
   F -->|boot 单体| DS[DeviceDownlinkDispatchService]
-  F -->|cloud 微服务| FE["DeviceDownlinkApi @FeignClient<br/>thinglinks-broker-server"]
+  F -->|cloud 微服务| FE["DeviceDownlinkApi<br/>→ thinglinks-broker-server"]
   FE --> CT[DeviceDownlinkController] --> DS
   DS -->|MQTT| MS[MqttDownlinkSender] --> MB[MqttBrokerService] --> BF[BifroMQ /pub]
   DS -->|WEBSOCKET| WSS[WebSocketDownlinkSender] --> WB[WebSocketBrokerService] --> RB[(RocketMQ 广播)]

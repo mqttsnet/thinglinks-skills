@@ -21,9 +21,10 @@ ThingLinks 云端是多模块单仓,**系统基础**(网关/认证/系统/基础
 base/oauth/system 的 `-facade` 各拆 3 个 Maven 子模块:
 - **`-api`**:纯接口(如 `DefUserFacade extends LoadService`)。
 - **`-boot-impl`**:单体部署 —— impl 直接调本地 `@Service`(进程内)。
-- **`-cloud-impl`**:微服务部署 —— impl 委托 **Feign `*Api`** 客户端 + Hystrix fallback。
+- **`-cloud-impl`**:微服务部署 —— impl 委托 **`*Api` 客户端** + fallback。
+  客户端技术按发行分叉(旗舰 Spring HTTP Interface / 社区 OpenFeign),写法见 `service-rpc.md`。
 
-两个 impl **注册同一个 Spring bean 名**(如 `@Service(EchoApi.DEF_USER_ID_CLASS)`),调用方与部署无关,每种部署只打包其中一个 impl jar。例 `DefUserFacade.findAllUserId()`:boot 直调 `defUserService`,cloud 调 `defUserApi`(Feign,`@Lazy` 注入,否则 gateway 启不来)。网关 server 依赖 `*-cloud-impl`,故网关总经 Feign 访问 base/system。
+两个 impl **注册同一个 Spring bean 名**(如 `@Service(EchoApi.DEF_USER_ID_CLASS)`),调用方与部署无关,每种部署只打包其中一个 impl jar。例 `DefUserFacade.findAllUserId()`:boot 直调 `defUserService`,cloud 调 `defUserApi`(**`@Autowired @Lazy` 注入,否则 gateway 启不来** —— 这条两条版本线都成立)。网关 server 依赖 `*-cloud-impl`,故网关总是通过 HTTP 访问 base/system。
 
 > 与设备下行 `DeviceDownlinkFacade`(见 `../iot/downlink-command.md`)是**同一套 Facade 双实现机制**。
 

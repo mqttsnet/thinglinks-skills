@@ -6,7 +6,7 @@
 
 | 子模块 | 职责 |
 | --- | --- |
-| `thinglinks-video-biz-protocol` | **GB28181 信令层**:transmit 管线、信令事件体系(38 类)、cmd、级联、会话/SSRC、Gb2016/2022 适配 → [gb28181.md](gb28181.md) |
+| `thinglinks-video-biz-protocol` | **GB28181 信令层**:transmit 管线、信令事件体系(19 类事件)、cmd、级联、会话/SSRC、Gb2016/2022 适配 → [gb28181.md](gb28181.md) |
 | `thinglinks-video-biz` | 业务层 manager/service/mapper/cache,域:device / gateway / group / media / platform / record / sip / ssrc / stream / hook / isup / jt1078 |
 | `thinglinks-video-entity` | 实体/VO/枚举(`enumeration/{gb28181,stream,device,media,hook,jt1078}`,历史误名 empowerment 已更正) |
 | `thinglinks-video-controller` | REST + 开放面(`anytenant` ZLM hook 回调);onvif / admin 域 |
@@ -32,7 +32,7 @@
 | 维度 | 结论 |
 | --- | --- |
 | 表基线 | `video_device`/`video_channel`(取代旧 info/channel 双表)、`video_device_alarm`、分组双表、`video_gateway_mapping`、级联三表、`video_record_plan/file`、`video_notify_subscription`、`video_sip_config`(SIP 密码 AES) |
-| 部署 | 独立 server(path `/video`);facade **无 cloud Feign 双实现**;定时任务走 **XXL-Job** |
+| 部署 | 独立 server(path `/video`);facade **无 cloud 双实现**(`video-cloud-impl` 模块在,但没有实现类);定时任务走 **XXL-Job** |
 | 上行来源 | 设备 SIP/RTP + ZLM hook,**不走 MQTT/Kafka 总线** |
 | 推前端 | 原生 WebSocket(JSR-356,租户隔离:`WebSocketAuthGuard.requireSameTenant`) |
 | 多租户 | `@DS(BASE_TENANT)` 动态数据源;hook 按 `@<tenant>` 后缀解析;SSRC/RTP 端口池 + 分布式锁保证集群安全 |

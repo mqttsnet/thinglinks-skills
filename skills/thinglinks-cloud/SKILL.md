@@ -11,12 +11,15 @@ description: >
   OTA 升级与物模型版本切换 (OtaModelVersionSwitcher).
   (2) System foundation: the reactive WebFlux gateway (Sa-Token auth, Nacos routing, Sentinel),
   oauth login/token (Sa-Token grant types), the system/base modules (Def* vs Base*), the
-  boot/cloud Facade duality, `/inner/**` internal API governance, and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
+  boot/cloud Facade duality, `/inner/**` internal API governance, XXL-Job scheduling (the
+  `thinglinks-job-admin` scheduler lives in its own engineering repo while the base/iot executors
+  stay in cloud), and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
   created_org_id tenant line), product manifest rendering, MQ namespace derivation, and Nacos/Seata
   deployment namespaces. (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
   RTP). (4) Security/runtime governance: the AI/MCP service (thinglinks-ai: MCP credential filter, `/inner/mcp/**` downstream contract), TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
-  internal Feign endpoints, ACL cache/runtime debugging. Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
-  网关/鉴权/Sa-Token, 多租户, `/inner`, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, MCP/AI 服务/内部接口, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
+  internal service RPC endpoints (Spring HTTP Interface on Enterprise, OpenFeign on Community),
+  ACL cache/runtime debugging. Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
+  网关/鉴权/Sa-Token, 多租户, `/inner`, 服务间调用/Feign/HttpExchange, 定时任务/XXL-Job/执行器/调度中心, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, MCP/AI 服务/内部接口, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
   gateway/oauth/system/base/broker/mqs/rule/link/video modules — even without saying "ThingLinks".
 ---
 
@@ -36,7 +39,9 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | `thinglinks-system` | 平台级 `Def*` 实体(租户/用户/客户端/应用·资源/字典/区域) |
 | `thinglinks-base` | 租户级 `Base*` 业务(组织/员工/角色/字典/文件/消息/操作日志) |
 | `thinglinks-public`(common/-config) | 共享属性·MQ 路由常量·缓存 key、鉴权放行表、Mybatis 租户/数据权限拦截器、动态数据源 |
-| `thinglinks-sop-gateway` / `thinglinks-support` | 开放平台网关(ISV 签名)/ 监控 + XXL-Job 执行器 |
+| `thinglinks-gateway` 的子模块 `thinglinks-sop-gateway-server` | 独立**开放平台网关**(Gitee SOP,ISV 签名,`/sopgateway`) |
+| `thinglinks-sop-admin` | 开放平台**管理端**:ISV 信息、接口/文档信息、系统配置、回调(`/sopadmin`,18765) |
+| `thinglinks-support`(monitor / base-executor / iot-executor) | Spring Boot Admin 监控 + **XXL-Job 执行器**(调度中心在独立工程,见 `system/job-scheduling.md`) |
 | `thinglinks-ai` | MCP Server:把平台与 IoT 数据以只读工具开放给外部 AI 客户端 |
 
 ### 物联网 IoT(`references/iot/`)
@@ -53,6 +58,17 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | --- | --- |
 | `thinglinks-video` | 独立 GB28181 视频平台(前置 ZLMediaKit/ABL,SIP/RTP,**与 IoT 模型独立**) |
 
+### 其余一级模块(存在,但本 skill 无专篇)
+
+列在这里是为了**别把它们当成不存在** —— 要改这些模块时按当前源码来,不要套用上面三个域的约定。
+
+| 模块 | 职责 |
+| --- | --- |
+| `thinglinks-view` | 可视化大屏后端:项目 / 模板 / 免登录发布访问 + MCP inner controller(18792) |
+| `thinglinks-mobile` | 移动端接口:空间、空间二维码(18798) |
+| `thinglinks-generator` | 代码生成器 `DefGen*`:项目 / 表 / 列(18780) |
+| `thinglinks-dependencies-parent` | 依赖版本收口(含 `mcp-sdk.version` + 官方 `mcp-bom`) |
+
 > 框架仓(`com.mqttsnet.basic.*`:协议编解码、Groovy 引擎、core 工具、租户上下文/DB 插件)见 **`thinglinks-util`** skill；前端控制台见 **`thinglinks-web`** skill。
 
 ## References Index
@@ -61,16 +77,18 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | File | Content | When to read |
 | --- | --- | --- |
 | [system/architecture.md](references/system/architecture.md) | 系统基础模块图 + **boot/cloud Facade 双实现**(与 IoT 下行 Facade 同范式) | 看系统基础全貌 / 改 facade |
+| [system/service-rpc.md](references/system/service-rpc.md) | **服务间调用按发行分叉**:旗舰 `@HttpExchange` + `@ImportHttpServices` + `@HttpServiceFallback` 三件套、社区 `@FeignClient`;header 透传、`@Lazy`、`R.timeout()` 语义 | 加/改任何下游服务调用 |
 | [system/gateway.md](references/system/gateway.md) | WebFlux 网关:Nacos 路由、Sa-Token 鉴权过滤器、Sentinel、CORS、放行表、sop-gateway | 改网关路由/鉴权/限流 |
 | [system/auth.md](references/system/auth.md) | Sa-Token 登录/令牌、授权类型、登录流程、网关校验 + header 信任 | 改登录/认证/权限 |
 | [system/multi-tenant.md](references/system/multi-tenant.md) | DATASOURCE_COLUMN:动态数据源 + `created_org_id` 列租户线 + 数据权限;Def* vs Base* | 改多租户/数据隔离 |
 | [system/product-configuration.md](references/system/product-configuration.md) | 产品清单、版本渲染、MQ 路由派生、Nacos/Seata 运行命名空间、跨发行同步边界 | 改版本/产品配置/MQ 前缀/部署命名空间 |
+| [system/job-scheduling.md](references/system/job-scheduling.md) | 定时任务:调度中心(独立工程 `thinglinks-job`)与两个执行器的分工、全部 JobHandler 清单、注册不上/调不动的排查顺序 | 任务没跑、加定时任务、改缓存刷新 |
 | [system/ai-mcp-service.md](references/system/ai-mcp-service.md) | AI 服务(MCP)接入链路:网关凭证过滤器与 header 重写、下游 `/inner/mcp/*` 专用 controller、`XxxMcpResultVO`/Converter 分层、数据权限显式开 | 为 MCP 加下游接口 / 改凭证链路 |
 
 ### 安全治理
 | File | Content | When to read |
 | --- | --- | --- |
-| [security/internal-api-governance.md](references/security/internal-api-governance.md) | `/inner/**` 内部 RPC、网关拒绝、Feign/header 透传、AnyUser→Inner 迁移检查 | 改内部接口/Feign 路径/网关放行表 |
+| [security/internal-api-governance.md](references/security/internal-api-governance.md) | `/inner/**` 内部 RPC、网关拒绝、header 透传、AnyUser→Inner 迁移检查(客户端写法见 `system/service-rpc.md`) | 改内部接口/内部调用路径/网关放行表 |
 | [security/tdengine-script-hardening.md](references/security/tdengine-script-hardening.md) | TDengine SQL `${}`/`#{}` 边界、TdsSqlGuard、Groovy/SpEL/FreeMarker 沙箱 | 修 TDS 注入/脚本表达式执行风险 |
 
 ### 物联网 IoT
@@ -98,7 +116,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | File | Content | When to read |
 | --- | --- | --- |
 | [video/video.md](references/video/video.md) | 总览:**biz-protocol 模块拆分**、域地图、表/缓存基线、点播流程、部署与多租户结论 | 视频域上手/找东西放哪 |
-| [video/gb28181.md](references/video/gb28181.md) | 信令层:transmit 管线、**信令事件体系(38 类)**、cmd、SSRC/会话、级联、Gb2016/2022 适配 | 改信令处理/加联动 listener |
+| [video/gb28181.md](references/video/gb28181.md) | 信令层:transmit 管线、**信令事件体系(19 类事件)**、cmd、SSRC/会话、级联、Gb2016/2022 适配 | 改信令处理/加联动 listener |
 | [video/media-access.md](references/video/media-access.md) | ZLM hook 事件面、stream/record 域、**ISUP / JT1078** 接入、VendorProtocolAdapter、ONVIF | 接媒体回调/新协议/新厂商 |
 
 ### 通用
@@ -113,7 +131,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 产品身份、Cloud/Util 版本与 MQ 前缀只改 `.thinglinks-product.env` 后走 `product-config.sh`；`NACOS_NAMESPACE` / `SEATA_NAMESPACE` 是独立的部署变量。详见 `system/product-configuration.md`。
 
 - **上行**:设备 PUBLISH → broker(ACL 鉴权)→ Kafka → `*KafkaInboundConsumer` → `BusPipelineDispatcher` → 边缘适配器归一 → `DeviceBizDispatchStage` → `DeviceEventDispatcher` → `DevicePublishProcessor` →(规则脚本前置转换 `InboundScriptTransformer`)→ `TopicHandlerFactory` 按 topic 正则路由 → handler → `DeviceDataProcessingService` 落 TDengine + 设备影子。
-- **下行**:业务层 `buildCommandMessage`(序列化一次)→ `ProtocolMessageAdapter.buildResponse` → 传输层 `DeviceDownlinkFacade.dispatch(DownlinkCommand)`(boot 直调 / cloud Feign)→ `DeviceDownlinkDispatchService` 按协议选 sender(MQTT→BifroMQ / WS→RocketMQ 广播 / TCP 占位)。
+- **下行**:业务层 `buildCommandMessage`(序列化一次)→ `ProtocolMessageAdapter.buildResponse` → 传输层 `DeviceDownlinkFacade.dispatch(DownlinkCommand)`(boot 直调 / cloud 走内部 HTTP 调用)→ `DeviceDownlinkDispatchService` 按协议选 sender(MQTT→BifroMQ / WS→RocketMQ 广播 / TCP 占位)。
 
 ### ⚠️ IoT 硬约定(反幻觉,细节见 `iot/*`)
 - 规则脚本 `payload` **必须 `JSON.toJSONString(...)` 返回**(否则 `LampJacksonModule` 把 Long 序列化成 String → 下游 `String cannot be cast to Long`)。
@@ -138,4 +156,6 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ---
 
-> **最后核对**：类名、包名和配置契约随版本演进，落地前核对当前源码 `com.mqttsnet.thinglinks.*` 与根目录产品清单。
+> 📌 **最后核对**：2026-08-22，对照旗舰 `thinglinks-cloud-pro-datasource-column` 与社区 monorepo 当前检出。
+> 类名、包名和配置契约随版本演进，落地前核对当前源码 `com.mqttsnet.thinglinks.*` 与根目录产品清单；
+> **服务间调用、模块清单、JDK 与 util 版本两条产品线并不一致**，动手前先确认发行。

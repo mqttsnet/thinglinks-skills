@@ -1,6 +1,6 @@
 # 下行命令 + OTA
 
-下行分两层:**① 业务层**构造平台标准报文(`thinglinks-link` 的 `DeviceCommandServiceImpl`、OTA 的 `OtaTaskExecutionHandler`、mqs 上行应答的 9 个 handler);**② 传输层** `DeviceDownlinkFacade` 按协议(MQTT/WS/TCP)把报文投到 broker。业务层只管"发什么",传输层只管"怎么送"。
+下行分两层:**① 业务层**构造平台标准报文(`thinglinks-link` 的 `DeviceCommandServiceImpl`、OTA 的 `OtaTaskExecutionHandler`、mqs 上行应答的 10 个 handler);**② 传输层** `DeviceDownlinkFacade` 按协议(MQTT/WS/TCP)把报文投到 broker。业务层只管"发什么",传输层只管"怎么送"。
 
 ## 下发链路总览
 
@@ -13,7 +13,7 @@
 ② 传输层
    → DeviceDownlinkFacade.dispatch(DownlinkCommand)
         ├ boot 部署:进程内直调 → DeviceDownlinkDispatchService
-        └ cloud 部署:DeviceDownlinkApi(@FeignClient thinglinks-broker-server)
+        └ cloud 部署:DeviceDownlinkApi(客户端接口 → thinglinks-broker-server)
                        → POST /inner/deviceDownlinkOpen/dispatch → DeviceDownlinkController → DeviceDownlinkDispatchService
    → DeviceDownlinkDispatchService 按 protocolType 选 sender(空/未知 → 兜底 MQTT)
         ├ MQTT      → MqttDownlinkSender      → MqttBrokerService.publishMessage      → BifroMQ /pub
@@ -30,15 +30,15 @@
 | --- | --- | --- |
 | `DeviceDownlinkFacade`(接口) | broker-api `com.mqttsnet.thinglinks.broker` | 唯一方法 `R<?> dispatch(DownlinkCommand)` |
 | `DeviceDownlinkFacadeImpl`(boot) | broker-boot-impl | 单体部署:直调 `DeviceDownlinkDispatchService` |
-| `DeviceDownlinkFacadeImpl`(cloud) | broker-cloud-impl | 微服务部署:走 Feign `DeviceDownlinkApi`(两个同名实现,按部署只上一个) |
-| `DeviceDownlinkApi`(`@FeignClient`) | broker-cloud-impl `broker.api` | `name=thinglinks-broker-server`、`path=/inner/deviceDownlinkOpen`、`POST /dispatch`、带 fallback |
-| `DeviceDownlinkController` | broker-controller | 收 Feign → `DeviceDownlinkDispatchService.dispatch` |
+| `DeviceDownlinkFacadeImpl`(cloud) | broker-cloud-impl | 微服务部署:走 `DeviceDownlinkApi`(两个同名实现,按部署只上一个) |
+| `DeviceDownlinkApi`(客户端接口) | broker-cloud-impl `broker.api` | 路径 `/inner/deviceDownlinkOpen`、`POST /dispatch`、带 fallback;目标服务 `thinglinks-broker-server`。**旗舰版是 `@HttpExchange` + `@PostExchange`,服务名与 fallback 在 `BrokerServerHttpServiceConfiguration` 里绑;社区版是 `@FeignClient(name=…, path=…, fallback=…)`** —— 见 `../system/service-rpc.md` |
+| `DeviceDownlinkController` | broker-controller | 收内部调用 → `DeviceDownlinkDispatchService.dispatch` |
 | `DeviceDownlinkDispatchService` | broker-biz `broker.downlink` | **真派发器**:启动期建 `Map<protocol→DownlinkChannelSender>`,按 `protocolType`(大写)选;空/未知 **兜底 MQTT**;sender 异常收进 `R.fail` |
 | `DownlinkChannelSender`(接口 SPI) | broker-biz `broker.downlink` | `supportedProtocol()` + `send(DownlinkCommand)`;实现 `MqttDownlinkSender` / `WebSocketDownlinkSender` / `TcpDownlinkSender` |
 | `DownlinkCommand`(DTO) | broker-entity `vo.query` | 协议无关载体:`protocolType/tenantId/clientId/deviceIdentification/topic/qos/payload/forceBase64Decode/clientType/expirySeconds/reqId` |
 
 - **协议常量** `DownlinkProtocols`:`MQTT` / `WEBSOCKET` / `TCP`,对齐 `ProtocolTypeEnum.getValue()`;协议由 `resolveProtocolType(productId, boundVersionNo)` 推出再塞进 `DownlinkCommand`。
-- **调用点**:link `DeviceCommandServiceImpl.buildAndSendMessage`(注入 `DeviceDownlinkFacade`);mqs `AbstractMessageHandler.sendMessage`(被 9 个上行应答 handler 复用:TimeSync / Ota* / SecretKey / *SubDevice / QueryDevice / Chatgpt…)。
+- **调用点**:link `DeviceCommandServiceImpl.buildAndSendMessage`(注入 `DeviceDownlinkFacade`);mqs `AbstractMessageHandler.sendMessage`(被 **10 个**上行应答 handler 复用:TimeSyncRequest / OtaPull / OtaReport / SecretKey / Add·Update·DeleteSubDevice / QueryDevice / ChatgptRequest / **ModelQuery**)。
 - **访问边界**:`/inner/deviceDownlinkOpen` 是服务间接口,经网关访问应被拒绝;控制台下发走 `/link/deviceCommand/issueCommands`。
 - **重构前 vs 后**:协议分支原本内联在调用方(link 旧私有 `sendMessage`/`sendWebSocketMessage` 的 if/else),现已收敛进 `DeviceDownlinkDispatchService`。**不存在**"旧 broker-api `@Component` 派发器"——c74a4f48 删的那批 `@Component` 是 WS 集群类(`SessionOwnerRegistry` 等,见 `ws-downlink-broadcast.md`),与下行命令无关。
 - WS 协议的投递细节(广播扇出 + 持有节点投递)见 **`ws-downlink-broadcast.md`**。

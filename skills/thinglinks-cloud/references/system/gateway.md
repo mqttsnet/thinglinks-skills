@@ -21,7 +21,7 @@
 - **限流**:Sentinel 网关适配(规则来自 `sentinel-datasource-nacos`),非自写过滤器。
 - **CORS**:`gateway/config/CorsConfiguration`,`@Order(MIN_VALUE)` `corsFilter()`,放行 `*` + 处理 OPTIONS 预检。
 - **访问表** `IgnoreProperties`(前缀 `thinglinks.ignore`):`anyone`(登录免 uri 权限)/ `anyUser`(免登录需租户)/ `anyTenant`(免登录免租户)/ `baseUri`(静态资源)/ `inner`(经网关拒绝);`authEnabled`、`notConfigUriAllow` 开关。
-- **内部 RPC**:`/inner/**` 只给 Feign 服务名直连,网关命中即拒绝。迁移规则见 `../security/internal-api-governance.md`。
+- **内部 RPC**:`/inner/**` 只给服务名直连,网关命中即拒绝。迁移规则见 `../security/internal-api-governance.md`,客户端写法见 `service-rpc.md`。
 
 ## 开放平台网关 `sop-gateway`(独立 app)
 
@@ -31,6 +31,6 @@ Gitee SOP(包 `com.gitee.sop`,context `/sopgateway`),给**第三方 ISV** 签名
 
 - 网关是 WebFlux 响应式,别按 servlet/MVC 过滤器写。
 - 令牌在**网关**统一校验,下游服务**信任网关注入的 header**(不复验 token,见 `auth.md`)。
-- 内部 Feign 路径不要放进 `anyUser`;用 `/inner` 并保持 header 透传。
+- 内部调用路径不要放进 `anyUser`;用 `/inner` 并保持 header 透传。
 - 路由在 Nacos,改路由改配置不改码。
 - 类名/行号随版本演进,核对真实代码。
