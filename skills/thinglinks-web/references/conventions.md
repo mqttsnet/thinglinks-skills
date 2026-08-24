@@ -27,12 +27,22 @@
 | `detail.vue` 或 `detail/index.vue` | 详情(多 Tab) |
 | `<feature>.vue`(camelCase) | 详情子 Tab/面板,如 `basicInfo.vue`、`modelDefinition.vue` |
 | `<Feature>Modal.vue` | 业务模态,如 `PublishModal.vue`、`ImportModal.vue` |
-| `<entity>.data.tsx` | schema:`columns()` 列 + `cardFields()` 卡片字段 + `createFormSchema()` 表单 |
+| `<entity>.data.tsx` | schema 导出,名字是约定俗成的:`columns`(35 处)、`searchFormSchema`(32)、`editFormSchema`(31)、`customFormSchemaRules`(34)、卡片视图再加 `cardFields`(17)。**没有 `createFormSchema` 这个名字**,新增页面照上面这套命名 |
 | `components/` | 页面局部子组件 |
 
 ## 3. 组件约定
 
-- **全局共享** → `src/components/`(通用)/ `src/components/iot/`(IoT 业务);PascalCase;`withInstall` 包装(`index.ts` 导出 + `src/Component.vue`)。
+- **全局共享** → `src/components/`(Vben 通用)/ `src/components/iot/`(IoT 业务);目录名 PascalCase。
+  **两处的目录形态不一样,加组件时跟所在那一侧走:**
+
+  | | 目录结构 | 说明 |
+  | --- | --- | --- |
+  | Vben 通用 `components/*` | `index.ts` + **`src/Component.vue`** | 54 个里 46 个是这个形态 |
+  | **IoT 业务 `components/iot/*`** | `index.ts` + **同名 `Component.vue`**(少数用 `index.vue`) | **25 个目录无一有 `src/` 子目录** |
+
+  IoT 侧的 `index.ts` 通常就三行(`import` + 具名导出 + `export default`),`withInstall` 包装
+  统一在 `components/iot/index.ts` 那一份里做,单个组件的 `index.ts` 不重复包。
+  新建 IoT 组件时**不要建 `src/` 子目录** —— 会和现有 25 个全都不一致。
 - **页面局部** → 页面目录下 `components/` 或同级 `.vue`。
 - 优先复用已有组件(见 `ui-components.md`),不重复造。
 - **分段切换**(手动/按设备、报文类型这类二选一)用 `<a-radio-group :options option-type="button">`(数据驱动、单组件),**别堆** `<a-radio-button>` 子组件 —— 单组件渲染更稳、更易维护(WS/MQTT 调试页实践)。

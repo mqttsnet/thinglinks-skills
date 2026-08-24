@@ -9,16 +9,33 @@
 
 ## 按钮/接口权限
 
-- **指令** `v-hasPermission`(`directives/permission.ts`):
-  ```vue
-  <a-button v-hasPermission="['rule:groovy:ruleGroovyScript:mockDebug']">调试</a-button>
-  ```
-- **Hook** `usePermission()`(`hooks/web/usePermission.ts`):
-  ```ts
-  const { hasPermission } = usePermission();
-  if (hasPermission(['system:menu:delete'])) { /* ... */ }
-  ```
-- 权限点是**通配符**(`WildcardPermission`):`module:sub:action`、`module:*:action`、`*`(支持隐含匹配)。
+`directives/permission.ts` 注册了**五个**指令,语义按「所有 / 任意」× 「拥有 / 没有」区分:
+
+| 指令 | 语义 | 用量 |
+| --- | --- | --- |
+| `v-hasAnyPermission` | 拥有列表里**任意一个** | **102 处 —— 事实上的默认写法** |
+| `v-hasPermission` | 拥有列表里**全部** | 6 处 |
+| `v-auth` | 同 `hasPermission`(拥有全部) | 少量 |
+| `v-withoutPermission` | **没有**全部 | 少量 |
+| `v-withoutAnyPermission` | **没有**任意一个 | 少量 |
+
+```vue
+<!-- 跟着代码库的主流写法来:单个权限点也用 hasAnyPermission -->
+<a-button v-hasAnyPermission="['rule:groovy:ruleGroovyScript:mockDebug']">调试</a-button>
+```
+
+⚠️ **传多个权限点时两者结果不同**:`v-hasPermission` 要求全部命中,`v-hasAnyPermission`
+命中一个即可。想表达「有其中之一就能看」却写了 `v-hasPermission`,按钮会对大部分角色消失,
+而这类问题在自己的管理员账号上测不出来。
+
+脚本里判断用 **Hook** `usePermission()`(`hooks/web/usePermission.ts`):
+
+```ts
+const { hasPermission } = usePermission();
+if (hasPermission(['system:menu:delete'])) { /* ... */ }
+```
+
+权限点是**通配符**(`WildcardPermission`):`module:sub:action`、`module:*:action`、`*`(支持隐含匹配)。
 
 ## 加一个 IoT 页面(典型流程)
 

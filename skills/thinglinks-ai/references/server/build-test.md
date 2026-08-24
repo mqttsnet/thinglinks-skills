@@ -14,9 +14,11 @@
 
 | 测什么 | 放哪 | 为什么 |
 | --- | --- | --- |
-| 工具取数与裁剪 | `thinglinks-ai-biz`(已单独打开 surefire) | mock Facade,快 |
+| 工具取数与裁剪 | `thinglinks-ai-biz` | mock Facade,快 |
 | 可选入参对齐 | `thinglinks-ai-server` | 唯一同时依赖 base 与 system 两个 `cloud-impl` 的模块,能反射到真实 HTTP Interface |
-| `SERVER_INSTRUCTIONS` 与工具清单一致 | `thinglinks-ai-biz` | 加工具忘了同步会红 |
+| `ToolInstructions` 与工具清单一致 | `thinglinks-ai-biz` | 加工具忘了同步会红 |
+| 每个 `ToolGroup` 都能被组件扫描发现 | `thinglinks-ai-biz` | 漏标 `@Component` 的那一组,工具会静默消失 |
+| `ToolDefinition` 转协议规格 | `thinglinks-ai-biz-mcp` | 适配层单独有测试,与能力层分开 |
 | facade 装配 | `thinglinks-ai-server` | biz 只需接口,少 cloud-impl 编译全过、启动才炸 |
 
 ## 单元测试照不到的三处

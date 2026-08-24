@@ -8,6 +8,14 @@
  *   3. Every file in `references/` is linked from SKILL.md (no orphan references).
  *   4. Optional `lint.json` purity rules hold — declared per skill, e.g. reference
  *      directories that must not leak implementation details (class names, SQL, module paths).
+ *   5. Every relative markdown link (`](../x.md)`) resolves — catches cross-skill links that
+ *      rot when a file moves.
+ *   6. Bare `references/<x>.md` paths written in prose resolve too. The References Index check
+ *      above only sees markdown-link form, so reorganising `references/` into subdirectories
+ *      used to leave these silently pointing at nothing.
+ *   7. Workflow front-matter `requires: [tool, ...]` names appear somewhere under
+ *      `references/orchestration/` — a typo there means the workflow declares a dependency on
+ *      a tool the routing layer never mentions.
  *
  * Zero external dependencies — run with `node scripts/validate.mjs`.
  * Exit code 0 = all valid, 1 = problems found (used by CI).
@@ -142,6 +150,79 @@ for (const name of skills) {
       }
       if (!violations) pass(`purity: ${(rule.paths ?? []).join(', ')}`);
     }
+  }
+
+  // collect every markdown file in the skill once — checks 5-7 all walk it
+  const mdFiles = [];
+  const collect = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) collect(p);
+      else if (e.name.endsWith('.md')) mdFiles.push(p);
+    }
+  };
+  collect(dir);
+
+  // 5) relative markdown links resolve (strip any #anchor before testing)
+  let relChecked = 0;
+  let relBad = 0;
+  for (const file of mdFiles) {
+    const body = readFileSync(file, 'utf8');
+    for (const m of body.matchAll(/\]\((\.\.?\/[^)\s]+)\)/g)) {
+      relChecked++;
+      const target = join(dirname(file), m[1].split('#')[0]);
+      if (!existsSync(target)) {
+        fail(`${name}: ${file.slice(dir.length + 1)} links ${m[1]} but it does not exist`);
+        relBad++;
+      }
+    }
+  }
+  if (relChecked && !relBad) pass(`${relChecked} relative link(s) resolve`);
+
+  // 6) bare `references/<x>.md` paths in prose resolve (skip cross-skill `../<skill>/references/...`)
+  let bareBad = 0;
+  for (const file of mdFiles) {
+    const body = readFileSync(file, 'utf8');
+    for (const m of body.matchAll(/(^|[^/\w.-])references\/([a-zA-Z0-9_/-]+\.md)/g)) {
+      if (!existsSync(join(dir, 'references', m[2]))) {
+        fail(
+          `${name}: ${file.slice(dir.length + 1)} mentions references/${m[2]} but that file does not exist ` +
+            `(left over from a references/ reorg?)`
+        );
+        bareBad++;
+      }
+    }
+  }
+  if (!bareBad) pass('bare references/ paths resolve');
+
+  // 7) workflow `requires:` names are known to the orchestration layer
+  const orchDir = join(refDir, 'orchestration');
+  if (existsSync(orchDir)) {
+    const orchText = mdFiles
+      .filter((f) => f.startsWith(orchDir))
+      .map((f) => readFileSync(f, 'utf8'))
+      .join('\n');
+    const declared = new Set();
+    let reqBad = 0;
+    // only real workflow pages — assets/ holds a skeleton whose `requires` are placeholders
+    const workflowDir = join(refDir, 'workflows');
+    for (const file of mdFiles.filter((f) => f.startsWith(workflowDir))) {
+      const fm = readFileSync(file, 'utf8').match(/^---\n([\s\S]*?)\n---/);
+      const req = fm?.[1].match(/^requires:\s*\[(.*)\]\s*$/m);
+      if (!req) continue;
+      for (const raw of req[1].split(',')) {
+        const tool = raw.trim();
+        if (!tool) continue;
+        declared.add(tool);
+        if (!orchText.includes(`\`${tool}\``)) {
+          fail(
+            `${name}: ${file.slice(dir.length + 1)} requires '${tool}' but no orchestration/ file mentions it`
+          );
+          reqBad++;
+        }
+      }
+    }
+    if (declared.size && !reqBad) pass(`${declared.size} required tool name(s) known to orchestration/`);
   }
 }
 

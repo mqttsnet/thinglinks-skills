@@ -14,7 +14,10 @@
 - 列出并不存在的工具 → 诱导模型去调,表现为一串找不到工具的报错
 - 工具加了却不提 → 模型多半想不到用它,等于白加
 
-这条约束由 `McpServerConfigurationTest` 守着,`SERVER_INSTRUCTIONS` 声明为包级可见即为此。
+这条约束由 `ToolCatalogTest` 守着;正文单独放在 `ToolInstructions` 里。
+
+**`instructions` 由两个出口共用**:MCP 面随 `InitializeResult` 下发,控制台聊天台拼进
+自己的系统提示。能力索引各写一份的话,加了工具只在一边生效,而两边的差异极难归因。
 
 `instructions` 里只放**工具索引**(name → 一句话职责 + 该工具自己的硬警告)。
 排查顺序、判据、措辞纪律不放这里,放 skill 按需加载 —— 全量塞进系统提示会挤占上下文,

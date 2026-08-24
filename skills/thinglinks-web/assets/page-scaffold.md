@@ -37,11 +37,18 @@ export const searchFormSchema = (): FormSchema[] => [
   { field: 'name', label: t('...'), component: 'Input', colProps: { span: 8 } },
 ];
 
-export const createFormSchema = (): FormSchema[] => [
+// 注意签名:29/30 个页面都收 `_type`,用它区分新增/编辑(如编辑时禁改主键)
+export const editFormSchema = (_type: Ref<ActionEnum>): FormSchema[] => [
   { field: 'id', label: 'id', component: 'Input', show: false },
   { field: 'name', label: t('...'), component: 'Input', required: true },
 ];
+
+// 需要跨字段联动/动态校验时再加,签名固定 `(_)`
+export const customFormSchemaRules = (_): Partial<FormSchemaExt>[] => [];
 ```
+
+> 四个导出名是约定俗成的(`columns` / `searchFormSchema` / `editFormSchema` /
+> `customFormSchemaRules`,卡片视图再加 `cardFields`),照抄别自创。
 
 ## 3. 列表 —— `src/views/iot/<域>/<entity>/index.vue`
 
@@ -50,7 +57,7 @@ export const createFormSchema = (): FormSchema[] => [
   <div>
     <BasicTable @register="registerTable">
       <template #toolbar>
-        <a-button type="primary" v-hasPermission="'<m>:<e>:add'" @click="openModal(true, { isUpdate: false })">
+        <a-button type="primary" v-hasAnyPermission="['<m>:<e>:add']" @click="openModal(true, { isUpdate: false })">
           {{ t('common.addText') }}
         </a-button>
       </template>
