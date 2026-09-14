@@ -84,6 +84,10 @@ public class ViewProjectMcpApiFallback implements ViewProjectMcpApi {
 「确实没有这条数据」分开。返回 `R.fail()` 或 null 会让上游把熔断当成业务空结果,
 MCP 那条链路上的表现就是 401 与 503 混在一起(见 `ai-mcp-service.md`)。
 
+调用方决定「要不要重试」时同样按 code 判:只有抛异常、响应为 null 或 `code == R.TIMEOUT_CODE`
+才算依赖不可达。`getIsSuccess()` 对超时和业务失败都是 false,拿它当重试条件会把业务失败也重试;
+成功但列表为空是正常结果,不重试。video-server 的 `TenantListLoader`(取租户列表,短退避)是现成写法。
+
 ## 外部固定地址不走服务发现
 
 BifroMQ 这类不在 Nacos 里的目标,group 名不是服务名,基址在配置里给:

@@ -47,21 +47,33 @@
 
 | 用途 | 模板 | 出处 |
 | --- | --- | --- |
-| 命令下发 | `/{sdkVersion}/devices/{deviceId}/command` | `DeviceCommandServiceImpl.generateResponseTopic`(行 360-381) |
+| 命令下发 | `/{sdkVersion}/devices/{deviceId}/command` | `DeviceCommandServiceImpl.generateResponseTopic` |
 | OTA 命令 | `/{version}/devices/{deviceId}/topo/otaCommand` | `OtaTaskExecutionHandler.generateResponseTopic`(行 155-157) |
 
-> 子设备用 `gatewayId` 代替 `deviceIdentification`。`sdkVersion` 如 `v1` → `/v1/devices/xxx/command`。
+> `sdkVersion` 如 `v1` → `/v1/devices/xxx/command`。子设备命令发到**父网关**的 topic 上,见下节。
 >
 > **OTA ≠ 仅下行**:OTA 还有上行侧动作 —— 升级成功 / 设备版本上报会触发 `OtaModelVersionSwitcher` 把设备绑定产品版本迁到升级包配置的目标(影子)版本(幂等 + fail-soft,不打断 OTA 主流程),详见 `iot/ota.md`。
 
+## 子设备命令:业务目标与接收方分开
+
+`DeviceCommandServiceImpl.buildAndSendMessage` 里一条命令有两个角色:
+
+| 角色 | 取谁 | 决定什么 |
+| --- | --- | --- |
+| 业务目标 `businessTarget` | 被下发的设备本身 | 业务体里的 `deviceIdentification` |
+| 接收方 `recipient` | 普通设备 / 网关是自己;**子设备是父网关** | 信封加密参数、下行 topic(网关自己的 `deviceSdkVersion` 与标识)、`protocolType`(按网关的产品与绑定版本解析)、`DownlinkCommand` 的 `clientId` / `deviceIdentification` |
+
+子设备逐项校验,任一不满足抛 `BizException`、**命令不发**:`gatewayId` 非空且不是自身 → 网关缓存存在 → 网关 `nodeType` 为网关且标识等于 `gatewayId` → 与子设备同租户。
+
+- 信封构造抛异常或返回 null 同样中止,不会退化成发 `{}`。日志只记目标 / 接收方标识、`cipherFlag` 和异常类型,**不记**加密参数、载荷和异常文本(可能带密钥材料)。
+
 ## ⚠️ 单次序列化(避免多层转义)
 
-`buildCommandMessage`(`DeviceCommandServiceImpl` 行 391-394)/ OTA(行 115-116)内部**已 `JSON.toJSONString` 一次**,返回 JSON 串。**不能再** `.map(JSON::toJSONString)`:
+`buildCommandMessage`(`DeviceCommandServiceImpl`)/ OTA(`OtaTaskExecutionHandler`)内部**已 `JSON.toJSONString` 一次**,返回 JSON 串。**不能再** `.map(JSON::toJSONString)`:
 
 ```java
 // 对(命令):buildCommandMessage 内部已序列化一次
-String commandMessageJson = Optional.ofNullable(commandRequest)
-    .map(cr -> buildCommandMessage(deviceCacheVO, cr)).orElse("{}");
+String commandMessageJson = buildCommandMessage(businessTarget, commandRequest);
 // 对(OTA):同样只一次
 String commandMessageJson = JSON.toJSONString(commandRequest);
 ProtocolDataMessageDTO msg = protocolMessageAdapter.buildResponse(commandMessageJson, encryptionDetails);
@@ -78,7 +90,7 @@ ProtocolDataMessageDTO msg = protocolMessageAdapter.buildResponse(commandMessage
 
 ## 加密下发(cipherFlag ≠ 0)
 
-`EncryptionDetailsDTO{ cipherFlag, signKey, encryptKey, encryptVector, mId }`(取自 DeviceCacheVO)。`buildResponse → ProtocolMessageSignatureVerifierUtils.encryptMessage`(util-pro/protocol-starter):
+`EncryptionDetailsDTO{ cipherFlag, signKey, encryptKey, encryptVector, mId }`(取自接收方的 DeviceCacheVO,子设备命令即父网关,见上文)。`buildResponse → ProtocolMessageSignatureVerifierUtils.encryptMessage`(util-pro/protocol-starter):
 - `cipherFlag=0` 明文:dataBody = 还原的 JSON 对象,不加密,`dataSign=""`;
 - `cipherFlag=1`(SM4)/`2`(AES256):dataBody = 密文(encryptKey/encryptVector),`dataSign` = sign(timeStamp:signKey)。
 
