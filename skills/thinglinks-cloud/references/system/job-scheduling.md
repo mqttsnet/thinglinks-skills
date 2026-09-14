@@ -31,10 +31,15 @@
 | `zlmMediaServerHeartbeatJobHandler` / `ablMediaServerHeartbeatJobHandler` | 流媒体节点心跳 |
 | `executeRecordPlanScheduleJobHandler` / `cleanExpiredRecordFilesJobHandler` | 录像计划 / 清理过期录像 |
 | `refreshMediaServerCacheJobHandler` / `refreshSipTenantConfigCacheJobHandler` | 刷流媒体、SIP 租户配置缓存 |
-| `deviceKeepaliveTimeoutCheckJobHandler` | GB28181 设备保活超时检查 |
+| `deviceKeepaliveTimeoutCheckJobHandler` | 视频设备保活超时置离线(RTSP / ONVIF 按协议整类跳过,它们的在线来源见 `../video/media-access.md`) |
 | `ssrcPoolReconcileJobHandler` | SSRC 池对账 |
+| `retryRecordFileUploadJobHandler` | 录像文件补传 |
+| `refreshDeviceSubscriptionJobHandler` | 视频设备订阅续订:执行器本地扫到期 Dialog,经 cloud-impl 调 video-server `/inner/videoSubscriptionOpen/renew`(SUBSCRIBE 只能由 video-server 发) |
 
 **`thinglinks-base-executor`** —— 平台侧:`smsSendJobHandler`(短信)、`publishMsgJobHandler`(站内信/通知)。
+
+> 视频还有一批**不在调度中心里**的周期任务:video-server 进程内的 `@Scheduled`(主动拉流设备存活探测、JT1078 租户索引、ONVIF 告警订阅等)。
+> 视频任务「没跑」时别只查调度中心,见 `../video/video.md`。
 
 > **缓存刷新类任务名里的 `AnyTenant` 是字面意思**:它们跨租户遍历,不是当前租户。
 > 排查「改了配置没生效」时,先确认对应的 flush 任务在调度中心是启用状态。

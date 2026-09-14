@@ -27,7 +27,7 @@ Agent Skills は、特定ドメインの **深いオンデマンドコンテキ�
 
 | Skill | リポジトリ | できること |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | クラウド基盤 — **システム基盤** / **IoT** / **動画** | **3 ドメイン。** *IoT:* ルールスクリプト、プロトコル封筒、TopicHandler、下り、物モデル、TDengine+シャドウ、ACL、WS ブロードキャスト。*システム:* WebFlux、Sa-Token、内部 API、DATASOURCE_COLUMN、製品マニフェスト/MQ 名前空間、Nacos/Seata デプロイ。*動画:* GB28181(ZLMediaKit)。 |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | クラウド基盤 — **システム基盤** / **IoT** / **動画** | **3 ドメイン。** *IoT:* ルールスクリプト、プロトコル封筒、TopicHandler、下り、物モデル、TDengine+シャドウ、ACL、WS ブロードキャスト。*システム:* WebFlux、Sa-Token、内部 API、DATASOURCE_COLUMN、製品マニフェスト/MQ 名前空間、Nacos/Seata デプロイ。*動画:* GB28181 とカスケード、ONVIF、RTSP、JT/T 1078(ZLMediaKit)、ノード単位の Hook 認証情報、デバイス死活。 |
 | [`thinglinks-edge`](./skills/thinglinks-edge/) | 独立 Edge 製品 — Manager + Node-RED | デバイス接続、プロトコルとポイント設定、Cloud モデル対応付け、データ・状態・コマンドの診断、インスタンス保守とバックアップ復元。 |
 | [`thinglinks-util`](./skills/thinglinks-util/) | フレームワーク基盤 — プロトコル / スクリプト / キャッシュ / メッセージング / core | プロトコルコーデック、Groovy の実行と安全境界、typed cache-aside とロック、Kafka/RocketMQ、ブリッジ SPI、機密フィールド暗号化、core ユーティリティ、ビルド/リリース規則。 |
 | [`thinglinks-web`](./skills/thinglinks-web/) | フロントコンソール — Vue3 + Vben | IoT ページ、defHttp API、ルーティング/権限、共有コンポーネント、ルール通知、製品マニフェスト/ビルドゲート、ブラウザ設定の安全性、i18n と規約。 |

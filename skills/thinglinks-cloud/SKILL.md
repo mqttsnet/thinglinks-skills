@@ -15,11 +15,11 @@ description: >
   `thinglinks-job-admin` scheduler lives in its own engineering repo while the base/iot executors
   stay in cloud), and the DATASOURCE_COLUMN multi-tenant model (dynamic datasource +
   created_org_id tenant line), product manifest rendering, MQ namespace derivation, and Nacos/Seata
-  deployment namespaces. (3) Video: the GB28181 streaming platform (ZLMediaKit hooks, SIP,
-  RTP). (4) Security/runtime governance: the AI/MCP service (thinglinks-ai: MCP credential filter, `/inner/mcp/**` downstream contract), TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
+  deployment namespaces. (3) Video: the streaming platform (GB28181 SIP signalling and cascade, ONVIF, RTSP proxies,
+  JT/T 1078 vehicle video with platform-side PS muxing, ZLMediaKit hooks and per-node hook credentials, device liveness). (4) Security/runtime governance: the AI/MCP service (thinglinks-ai: MCP credential filter, `/inner/mcp/**` downstream contract), TDS/TDengine SQL hardening, Groovy/SpEL/FreeMarker sandboxing,
   internal service RPC endpoints (Spring HTTP Interface on Enterprise, OpenFeign on Community),
   ACL cache/runtime debugging. Trigger whenever the user mentions ThingLinks, 规则脚本, 设备上行/下行, 物模型, 设备影子,
-  网关/鉴权/Sa-Token, 多租户, `/inner`, 服务间调用/Feign/HttpExchange, 定时任务/XXL-Job/执行器/调度中心, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, MCP/AI 服务/内部接口, Groovy 沙箱, 流媒体/GB28181, 版本发布/灰度/影子, OTA 升级/版本切换, or the
+  网关/鉴权/Sa-Token, 多租户, `/inner`, 服务间调用/Feign/HttpExchange, 定时任务/XXL-Job/执行器/调度中心, 产品配置/版本号/MQ 命名空间/Nacos/Seata, TDS/TDengine 安全, MCP/AI 服务/内部接口, Groovy 沙箱, 流媒体/GB28181/国标级联/ONVIF/RTSP/JT1078/车载视频/视频设备接入/摄像机注册不上/点播没画面, 版本发布/灰度/影子, OTA 升级/版本切换, or the
   gateway/oauth/system/base/broker/mqs/rule/link/video modules — even without saying "ThingLinks".
 ---
 
@@ -58,7 +58,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 ### 流媒体 video(`references/video/`)
 | 模块 | 职责 |
 | --- | --- |
-| `thinglinks-video` | 独立 GB28181 视频平台(前置 ZLMediaKit/ABL,SIP/RTP,**与 IoT 模型独立**) |
+| `thinglinks-video` | 独立视频平台:GB28181 / ONVIF / RTSP / JT/T 1078 接入,前置 ZLMediaKit/ABL,**与 IoT 模型独立** |
 
 ### 其余一级模块(存在,但本 skill 无专篇)
 
@@ -100,7 +100,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [iot/protocol-envelope.md](references/iot/protocol-envelope.md) | 信封 head/dataBody/dataSign、cipherFlag、加签、序列化坑 | 构造/解析平台报文 |
 | [iot/topic-handler.md](references/iot/topic-handler.md) | 自定义上行 `TopicHandler`:`topicPattern()` 正则 + `handle()` | 厂商私有 topic 走 Java 链路 |
 | [iot/uplink-pipeline.md](references/iot/uplink-pipeline.md) | bus 管道全链路(consumer→dispatcher→stage→processor→handler) | 看懂/改上行链路 |
-| [iot/downlink-command.md](references/iot/downlink-command.md) | 下行两层(业务构造 + `DeviceDownlinkFacade` 协议派发)、buildResponse、单次序列化、OTA | 写设备下行命令 |
+| [iot/downlink-command.md](references/iot/downlink-command.md) | 下行两层(业务构造 + `DeviceDownlinkFacade` 协议派发)、**子设备命令经父网关**(业务目标 / 接收方分离)、buildResponse、单次序列化、OTA | 写设备下行命令 |
 | [iot/ws-downlink-broadcast.md](references/iot/ws-downlink-broadcast.md) | WS 下行广播:`WsDeviceSessionRegistry` + `BROADCASTING` 消费者 + 心跳/TTL | 改 WS 下行/多节点会话 |
 | [iot/thing-model.md](references/iot/thing-model.md) | 物模型 services/properties/datatype/enumlist、版本发布建表 | 对齐字段/类型、版本发布 |
 | [iot/product-version-publish.md](references/iot/product-version-publish.md) | 发布编排:FULL/CANARY/SHADOW 策略、灰度名单(去百分比)、整条记录幂等 rerun 重试、灰度期 previousFullVersionNo | 改发布编排/灰度/影子改绑/重试 |
@@ -118,9 +118,15 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 ### 流媒体 video
 | File | Content | When to read |
 | --- | --- | --- |
-| [video/video.md](references/video/video.md) | 总览:**biz-protocol 模块拆分**、域地图、表/缓存基线、点播流程、部署与多租户结论 | 视频域上手/找东西放哪 |
-| [video/gb28181.md](references/video/gb28181.md) | 信令层:transmit 管线、**信令事件体系(19 类事件)**、cmd、SSRC/会话、级联、Gb2016/2022 适配 | 改信令处理/加联动 listener |
-| [video/media-access.md](references/video/media-access.md) | ZLM hook 事件面、stream/record 域、**ISUP / JT1078** 接入、VendorProtocolAdapter、ONVIF | 接媒体回调/新协议/新厂商 |
+| [video/video.md](references/video/video.md) | 总览:模块拆分与放置判据、**多协议 SPI + 能力位**(GB28181 / ONVIF / RTSP / JT1078,无 ISUP)、表/缓存基线、定时任务两处、**多副本约束**(独立可达地址、JT1078 单副本)、多租户 | 视频域上手/找东西放哪/部署多副本 |
+| [video/gb28181.md](references/video/gb28181.md) | 信令层:**SIP 租户路由**、transmit 管线(query/response/notify/control)、**信令事件体系(18 类事件)**、cmd、会话/SSRC、版本与厂商适配、**级联上级请求授权**、语音对讲 | 改信令处理/加联动 listener/级联 |
+| [video/media-access.md](references/video/media-access.md) | ZLM hook 与**每节点 Hook 凭据**、stream/record(云端 + 设备端录像、截图)、**RTSP / ONVIF / JT1078** 接入细节与封装陷阱、**ONVIF/RTSP 设备在线状态**(代理流到达 + 分片探测) | 接媒体回调/新协议/1078 没画面/设备一直显示在线 |
+| [video/runtime-state.md](references/video/runtime-state.md) | 在线状态:设备 `updateDeviceLiveness` 唯一入口 + **HLC CAS**、通道联动、保活超时公式、媒体节点「hook 只写在线 / 离线只认探测」、事件分层地图、WebSocket 集群推送 | 状态显示不对/加状态联动/改前端推送 |
+| [video/stream-resources.md](references/video/stream-resources.md) | 媒体资源:**SSRC 池**(编号规则)、RTP 收发端口、SSRC 事务与流信息的缓存结构、Hook 订阅、断流恢复、回放/下载准入、录像计划/上传/补传/清理 | 点播资源泄漏/SSRC 耗尽/录像没落库 |
+| [video/device-onboarding.md](references/video/device-onboarding.md) | **设备接入指南**:平台侧前置(媒体节点、可达地址),GB28181 / RTSP / ONVIF / JT1078 各自的**设备侧填什么、平台侧建什么**(对应控制台字段)、注册 / 鉴权每一步的判据、验收步骤 | 协助用户接入摄像机 / NVR / 下级平台 / 车载终端 |
+| [video/troubleshooting.md](references/video/troubleshooting.md) | **用户问题排查**:按阶段(平台就绪 / 注册上线 / 通道 / 点播 / 回放录像 / 云台对讲推送)的现象 → 判据、四段单向链路、配置清单、运维接口、日志锚点、Redis 门禁用例 | 注册不上/没通道/没画面/录像不录/部署排障 |
+
+> **协助用户接入设备、排查使用问题**:先读 `video/device-onboarding.md` 确认用户卡在哪一步、各项填得对不对,再按 `video/troubleshooting.md` 的阶段对照现象。给用户的说法以控制台字段名为准。
 
 ### 通用
 | File | Content | When to read |
@@ -160,6 +166,6 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ---
 
-> 📌 **最后核对**：2026-08-22，对照旗舰 `thinglinks-cloud-pro-datasource-column` 与社区 monorepo 当前检出。
+> 📌 **最后核对**：2026-09-14（video 三篇、视频定时任务清单、子设备下行、重试判据，对照 pro 当前代码）；其余内容 2026-08-22，对照旗舰 `thinglinks-cloud-pro-datasource-column` 与社区 monorepo 当前检出。
 > 类名、包名和配置契约随版本演进，落地前核对当前源码 `com.mqttsnet.thinglinks.*` 与根目录产品清单；
 > **服务间调用、模块清单、JDK 与 util 版本两条产品线并不一致**，动手前先确认发行。

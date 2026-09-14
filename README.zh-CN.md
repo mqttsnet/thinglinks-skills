@@ -27,7 +27,7 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 
 | Skill | 对应仓库 | 帮你做什么 |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云平台 —— **系统基础** / **IoT** / **流媒体** | **三域。** *IoT:* 规则脚本、协议信封、TopicHandler、下行、物模型、TDengine+影子、ACL、WS 广播。*系统基础:* WebFlux 网关、Sa-Token、内部接口、服务间调用(按发行分 HTTP Interface / Feign)、DATASOURCE_COLUMN 多租户、产品清单/MQ 命名空间、Nacos/Seata 部署、XXL-Job 定时任务。*流媒体:* GB28181(ZLMediaKit)。 |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云平台 —— **系统基础** / **IoT** / **流媒体** | **三域。** *IoT:* 规则脚本、协议信封、TopicHandler、下行、物模型、TDengine+影子、ACL、WS 广播。*系统基础:* WebFlux 网关、Sa-Token、内部接口、服务间调用(按发行分 HTTP Interface / Feign)、DATASOURCE_COLUMN 多租户、产品清单/MQ 命名空间、Nacos/Seata 部署、XXL-Job 定时任务。*流媒体:* GB28181 与级联、ONVIF、RTSP、JT/T 1078(ZLMediaKit)、每节点 Hook 凭据、设备在线状态。 |
 | [`thinglinks-edge`](./skills/thinglinks-edge/) | 独立 Edge 产品 —— Manager + Node-RED | **设备接入与现场维护。** 协议选择、试读和点表配置、物模型映射、云边数据/在线状态/命令排障、实例与组件管理、升级和备份恢复。 |
 | [`thinglinks-util`](./skills/thinglinks-util/) | 框架底座 —— 协议 / 脚本 / 缓存 / 消息 / core | 协议**编解码**、Groovy 执行与安全边界、typed **cache-aside 与锁**、Kafka/RocketMQ、桥接 SPI、敏感字段加密、ID/Jackson/topic/HLC 工具和构建发行规则。 |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT 页面、defHttp API、路由权限、共享组件、规则脚本调试、规则联动通知、产品清单/构建门禁、浏览器配置安全、i18n 与开发准则。 |
@@ -62,7 +62,7 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 └── agents/openai.yaml# 跨工具接口(Codex / OpenAI)
 ```
 
-- `thinglinks-cloud` —— 32 篇 references(**`system/` · `security/` · `iot/` · `video/`**,含服务间调用、产品配置、内部接口治理、定时任务、运行时调试、设备接入/测试)+ 3 个 Groovy 骨架 + Mermaid 架构图
+- `thinglinks-cloud` —— 36 篇 references(**`system/` · `security/` · `iot/` · `video/`**,含服务间调用、产品配置、内部接口治理、定时任务、运行时调试、设备接入/测试)+ 3 个 Groovy 骨架 + Mermaid 架构图
 - `thinglinks-edge` —— 8 篇 references（设备接入 / 协议配置 / 云边诊断 / 在线状态 / 命令 / 部署维护 / 故障定位 / 开发入口）+ 接入信息表与行为用例
 - `thinglinks-util` —— 11 篇 references(协议 / Groovy / 缓存 / 加密 / core / Kafka / RocketMQ / 桥接 / cloud-starter / 扩展库引擎 / 构建发行)
 - `thinglinks-web` —— 9 篇 references(结构 / API / 路由权限 / 开发准则 / 组件 / 页面地图 / 脚本调试 / 联动通知 / 产品构建安全)

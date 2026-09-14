@@ -27,7 +27,7 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 
 | Skill | Repository | What it helps you do |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink, thing-model, TDengine + shadow, ACL, WS broadcast. *System:* WebFlux gateway, Sa-Token, internal APIs, service-to-service RPC (HTTP Interface vs Feign, by edition), DATASOURCE_COLUMN multi-tenant, product manifest/MQ namespace, Nacos/Seata deployment, XXL-Job scheduling. *Video:* GB28181 (ZLMediaKit). |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink, thing-model, TDengine + shadow, ACL, WS broadcast. *System:* WebFlux gateway, Sa-Token, internal APIs, service-to-service RPC (HTTP Interface vs Feign, by edition), DATASOURCE_COLUMN multi-tenant, product manifest/MQ namespace, Nacos/Seata deployment, XXL-Job scheduling. *Video:* GB28181 + cascade, ONVIF, RTSP, JT/T 1078 (ZLMediaKit), per-node hook credentials, device liveness. |
 | [`thinglinks-edge`](./skills/thinglinks-edge/) | Edge Manager + Node-RED | Device onboarding, protocol and point configuration, Cloud model mapping, data/status/command diagnosis, instance maintenance and backup recovery. |
 | [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — protocol / script / cache / messaging / core | Protocol **codec**, Groovy execution and safety boundaries, typed **cache-aside and locks**, Kafka/RocketMQ, databridge SPI, sensitive-field encryption, IDs/Jackson/topic/HLC utilities, the **service-call foundation** (HTTP Interface wiring, connection pool, header propagation), **extend-database engines** (TDengine / ClickHouse / IoTDB), and build/release rules. |
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT pages, defHttp APIs, routing/permission, shared components, rule-script debug, rule-linkage notifications, product manifest/build gates, browser configuration security, i18n and conventions. |
@@ -67,7 +67,7 @@ Repo-level tooling: `scripts/validate.mjs` (CI: frontmatter, References Index, r
 reference paths, workflow `requires`, per-skill `lint.json` purity) and `scripts/pack-playbooks.mjs`
 (bundles `thinglinks-ai` runtime playbooks into one pasteable text blob for a hosted runtime).
 
-- `thinglinks-cloud` — 32 references across **`system/` · `security/` · `iot/` · `video/`** (including service-to-service RPC, product configuration, internal API governance, job scheduling, runtime debugging, device access/testing) + 3 Groovy skeletons + Mermaid diagrams
+- `thinglinks-cloud` — 36 references across **`system/` · `security/` · `iot/` · `video/`** (including service-to-service RPC, product configuration, internal API governance, job scheduling, runtime debugging, device access/testing) + 3 Groovy skeletons + Mermaid diagrams
 - `thinglinks-edge` — 8 references for onboarding, protocols, Cloud diagnosis, presence, commands, operations, troubleshooting and development; an intake worksheet and behavioral cases
 - `thinglinks-util` — 11 references (protocol / Groovy / cache / encryption / core / Kafka / RocketMQ / databridge / cloud-starter / tds extend-db / build-release)
 - `thinglinks-web` — 9 references (structure / api / routing-permission / conventions / components / IoT pages / script debug / rule notifications / product-build security)
