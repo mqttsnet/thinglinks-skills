@@ -7,7 +7,7 @@
 모든 AI 에이전트(Claude Code · Codex · Cursor)를 ThingLinks 전문가로 만드는 구조화된 온디맨드 지식 팩.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-skills)
+[![Skills](https://img.shields.io/badge/skills-7-brightgreen.svg)](#-skills)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -28,6 +28,7 @@ Agent Skills 는 특정 도메인에 대한 **깊고 온디맨드한 컨텍스�
 | Skill | 저장소 | 할 수 있는 것 |
 | --- | --- | --- |
 | [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 클라우드 플랫폼 — **시스템 기반** / **IoT** / **비디오** | **3 도메인.** *IoT:* 룰 스크립트, 프로토콜 엔벨로프, TopicHandler, 다운링크, 사물 모델, TDengine+섀도우, ACL, WS 브로드캐스트. *시스템:* WebFlux, Sa-Token, 내부 API, DATASOURCE_COLUMN, 제품 매니페스트/MQ 네임스페이스, Nacos/Seata 배포. *비디오:* GB28181(ZLMediaKit). |
+| [`thinglinks-edge`](./skills/thinglinks-edge/) | 독립 Edge 제품 — Manager + Node-RED | 장치 연결, 프로토콜·포인트 설정, Cloud 모델 매핑, 데이터·상태·명령 진단, 인스턴스 유지보수와 백업 복원. |
 | [`thinglinks-util`](./skills/thinglinks-util/) | 프레임워크 기반 — 프로토콜 / 스크립트 / 캐시 / 메시징 / core | 프로토콜 코덱, Groovy 실행과 보안 경계, typed cache-aside와 잠금, Kafka/RocketMQ, 브리지 SPI, 민감 필드 암호화, core 유틸리티, 빌드/릴리스 규칙. |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 프론트 콘솔 — Vue3 + Vben | IoT 페이지, defHttp API, 라우팅/권한, 공유 컴포넌트, 룰 알림, 제품 매니페스트/빌드 게이트, 브라우저 설정 보안, i18n과 컨벤션. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ 브로커 플러그인 — `bifromq-plugin-pro` | 인증/ACL, Kafka 이벤트 계약, setting/스로틀링의 실제 경계, 런타임 설정과 로그 보안, 호환 버전, 패키징 및 배포. |
@@ -41,6 +42,7 @@ Agent Skills 는 특정 도메인에 대한 **깊고 온디맨드한 컨텍스�
 ```bash
 # 전역(-g); -g 를 빼면 현재 프로젝트에만
 npx skills add mqttsnet/thinglinks-skills@thinglinks-cloud -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-edge -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g

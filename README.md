@@ -7,7 +7,7 @@
 Structured, on-demand knowledge packs that turn any AI agent (Claude Code · Codex · Cursor) into a ThingLinks expert.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-skills)
+[![Skills](https://img.shields.io/badge/skills-7-brightgreen.svg)](#-skills)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -28,6 +28,7 @@ This repository collects the official skills for the **[ThingLinks](https://gith
 | Skill | Repository | What it helps you do |
 | --- | --- | --- |
 | [`thinglinks-cloud`](./skills/thinglinks-cloud/) | cloud platform — **system** / **IoT** / **video** | **3 domains.** *IoT:* rule scripts, protocol envelope, TopicHandler, downlink, thing-model, TDengine + shadow, ACL, WS broadcast. *System:* WebFlux gateway, Sa-Token, internal APIs, service-to-service RPC (HTTP Interface vs Feign, by edition), DATASOURCE_COLUMN multi-tenant, product manifest/MQ namespace, Nacos/Seata deployment, XXL-Job scheduling. *Video:* GB28181 (ZLMediaKit). |
+| [`thinglinks-edge`](./skills/thinglinks-edge/) | Edge Manager + Node-RED | Device onboarding, protocol and point configuration, Cloud model mapping, data/status/command diagnosis, instance maintenance and backup recovery. |
 | [`thinglinks-util`](./skills/thinglinks-util/) | framework foundation — protocol / script / cache / messaging / core | Protocol **codec**, Groovy execution and safety boundaries, typed **cache-aside and locks**, Kafka/RocketMQ, databridge SPI, sensitive-field encryption, IDs/Jackson/topic/HLC utilities, the **service-call foundation** (HTTP Interface wiring, connection pool, header propagation), **extend-database engines** (TDengine / ClickHouse / IoTDB), and build/release rules. |
 | [`thinglinks-web`](./skills/thinglinks-web/) | frontend console — Vue3 + Vben | IoT pages, defHttp APIs, routing/permission, shared components, rule-script debug, rule-linkage notifications, product manifest/build gates, browser configuration security, i18n and conventions. |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker plugins — `bifromq-plugin-pro` | Auth/ACL, Kafka event contracts, setting/throttler realities, runtime config and logging safety, compatibility versions, packaging, and deployment. |
@@ -41,6 +42,7 @@ Via the [Skills CLI](https://skills.sh/) — install only the skills you need:
 ```bash
 # Global (-g) — available in all projects; drop -g for the current project only
 npx skills add mqttsnet/thinglinks-skills@thinglinks-cloud -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-edge -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
@@ -65,7 +67,8 @@ Repo-level tooling: `scripts/validate.mjs` (CI: frontmatter, References Index, r
 reference paths, workflow `requires`, per-skill `lint.json` purity) and `scripts/pack-playbooks.mjs`
 (bundles `thinglinks-ai` runtime playbooks into one pasteable text blob for a hosted runtime).
 
-- `thinglinks-cloud` — 31 references across **`system/` · `security/` · `iot/` · `video/`** (including service-to-service RPC, product configuration, internal API governance, job scheduling, runtime debugging, device access/testing) + 3 Groovy skeletons + Mermaid diagrams
+- `thinglinks-cloud` — 32 references across **`system/` · `security/` · `iot/` · `video/`** (including service-to-service RPC, product configuration, internal API governance, job scheduling, runtime debugging, device access/testing) + 3 Groovy skeletons + Mermaid diagrams
+- `thinglinks-edge` — 8 references for onboarding, protocols, Cloud diagnosis, presence, commands, operations, troubleshooting and development; an intake worksheet and behavioral cases
 - `thinglinks-util` — 11 references (protocol / Groovy / cache / encryption / core / Kafka / RocketMQ / databridge / cloud-starter / tds extend-db / build-release)
 - `thinglinks-web` — 9 references (structure / api / routing-permission / conventions / components / IoT pages / script debug / rule notifications / product-build security)
 - `bifromq-plugin` — 6 references (auth-ACL / events / setting-throttler / deployment / runtime safety / build-release)
@@ -79,6 +82,7 @@ Repo = namespace; **skill names map 1:1 to the platform's repositories** (no `-d
 | Skill | Repository |
 | --- | --- |
 | `thinglinks-cloud` | cloud business platform — `broker` / `mqs` / `rule` / `link` / `public` / `ai`, plus the XXL-Job scheduler that lives in its own repo |
+| `thinglinks-edge` | independent Edge product — device onboarding, Node-RED instances, Cloud integration and maintenance |
 | `thinglinks-util` | framework foundation — protocol / script / cache / messaging / core |
 | `thinglinks-web` | frontend console — Vue3 |
 | `bifromq-plugin` | BifroMQ broker plugins — `bifromq-plugin-pro` |

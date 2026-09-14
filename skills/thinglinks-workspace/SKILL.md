@@ -50,9 +50,10 @@ description: >
 | `thinglinks-scada-pro` | SCADA 组态(FUXA 派生,NodeJS + Angular) |
 | `thinglinks-web-pro-vben` | Vben 5.x 新控制台原型,与在用的 `thinglinks-web-pro` 并存 |
 | `thinglinks_sdk` / `thinglinks-mqtt-c` | 设备侧 C SDK / MQTT C 客户端库 |
-| `thinglinks-edge` / `thinglinks-edge-docs` | 多租户 Node-RED 边缘,README 已标 Deprecated |
+| `thinglinks-edge` | 独立 Edge 产品：Node-RED 受管实例、协议模板、设备点位、Cloud 上下行及维护；使用 [`thinglinks-edge`](../thinglinks-edge/SKILL.md) |
+| `thinglinks-edge-docs` | 历史独立文档仓；状态单独核对，不据此判定当前 Edge 产品已弃用；当前产品文档从 Edge 仓 `docs/README.md` 进入 |
 
-要改这些仓时**没有对应 skill**,按仓内 README 与代码行事,不要套用 cloud/web 的约定。
+Edge 已有专属 skill，其余上述工程按各仓 README 与代码行事，不套用 cloud/web 约定。Edge 的 `apps/web-console` 是本仓控制台，不是 `thinglinks-web-pro`；Edge/Node-RED 制品版本也不参与五组件版本编排。
 
 ## 2. 两条线已经分叉的地方(动手前先确认)
 
@@ -88,8 +89,9 @@ dependencies-parent。
 
 ## 4. 版本线与产品清单
 
-**版本号的唯一真相是每个组件根目录的 `.thinglinks-product.env`**,不是 pom 的 `<revision>`、
+**下述双产品线组件的版本号以根目录 `.thinglinks-product.env` 为准**,不是 pom 的 `<revision>`、
 不是 package.json、更不是检出目录名。那些都是从清单派生出来的产物。
+Edge 等上节独立产品使用自己的发布清单、package.json、镜像与组件版本约定，不套用本节五组件升版流程。
 
 | 线 | 当前形态 | 怎么改 |
 | --- | --- | --- |
