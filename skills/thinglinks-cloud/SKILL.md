@@ -27,6 +27,8 @@ description: >
 
 > 适用于 ThingLinks Cloud 后端源码树；具体工作区映射见 `thinglinks-workspace`。产品身份、发行信息和版本以根目录 `.thinglinks-product.env` 为准，不从检出目录名推断。
 
+涉及 **ThingLinks Edge / Node-RED 现场设备接入、点表、配置引导、实例或维护**，以 [`thinglinks-edge`](../thinglinks-edge/SKILL.md) 为主；本 skill 处理其云端契约和消费链路。跨云边诊断读 [云边协同](references/iot/edge-integration.md)，只读 MCP 查询结合 `thinglinks-ai`。云端 `ProtocolEdgeAdapter` 与独立 Edge 产品是不同边界。
+
 ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa-Token)+ BifroMQ(MQTT broker)+ Kafka/RocketMQ + TDengine + Redis + Nacos + Vue3**。包名 `com.mqttsnet.thinglinks`。**三大应用域:系统基础 / 物联网 IoT / 流媒体 video**,references 按域分目录。
 
 ## 模块速览(按域)
@@ -107,6 +109,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 | [iot/device-data.md](references/iot/device-data.md) | DeviceDataProcessingService 落库:TDengine 超表/子表 + 设备影子 | 落库流程、子表排查 |
 | [iot/acl-topic-match.md](references/iot/acl-topic-match.md) | ACL 发布鉴权 + MqttTopicMatcher(`#`、前导 `/` 规则) | topic 匹配 / ACL 断连 |
 | [iot/device-access.md](references/iot/device-access.md) | 设备接入:连接鉴权 / ACL 端点、clientId·凭证派生、WS/MQTT 接入、上行 topic→handler、上行帧 | 接设备 / 模拟上行测试 |
+| [iot/edge-integration.md](references/iot/edge-integration.md) | Edge 网关/子设备身份、绑定版本、数据/状态/命令 Topic、Cloud 落库及独立回执记录边界；结合只读 MCP | 现场设备经 Edge 上云、云边数据/在线状态/回执不一致 |
 | [iot/extension-points.md](references/iot/extension-points.md) | 上行三层扩展(DeviceEventProcessor / TopicHandler / 规则脚本)+ bus SPI | 给平台加动作/旁路/topic |
 | [iot/troubleshooting.md](references/iot/troubleshooting.md) | 4 道关排查 + 常见错误对照 + 日志锚点 | 上行不生效/影子无数据/脚本报错 |
 | [iot/testing.md](references/iot/testing.md) | 测试 playbook:下发(`sendMqttCustomMessage`/`dispatch`)、脚本调试(`transformDebug`)、影子/TDengine/指令记录校验、端到端流 | 测试上下行 / 验证落库 |
@@ -149,6 +152,7 @@ ThingLinks 云端是多模块平台,技术栈 **Spring Cloud(WebFlux 网关 + Sa
 
 ## 相关 skill
 
+- **[`thinglinks-edge`](../thinglinks-edge/SKILL.md)** — 现场协议接入、点表与模板配置、云边排障、命令执行及实例维护。
 - **[`thinglinks-util`](../thinglinks-util/)** — 协议编解码、Groovy 引擎、HLC、core 工具、租户上下文/DB 插件的**实现**(`com.mqttsnet.basic.*`)。
 - **[`thinglinks-web`](../thinglinks-web/)** — 前端控制台 / 规则脚本调试面板 / 物模型编辑。
 - **[`bifromq-plugin`](../bifromq-plugin/)** — broker 侧 ACL/认证 + 事件采集(IoT 上行的源头,喂 mqs)。

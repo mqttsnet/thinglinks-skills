@@ -1,0 +1,362 @@
+{
+  "skill_name": "thinglinks-edge",
+  "evals": [
+    {
+      "id": 1,
+      "name": "modbus-minimal-onboarding",
+      "prompt": "服务器有 Docker，想把一台 Modbus-TCP 电表接到 ThingLinks，点表有 40001 电压和 40003 电流，怎么配置？尽量简单。",
+      "fixture": {
+        "edgeInstalled": false,
+        "manual": "仅给出点位名称及地址，未给类型、宽度和地址模式"
+      },
+      "covers": [
+        "references/onboarding.md",
+        "references/protocols.md",
+        "references/operations.md"
+      ],
+      "assertions": [
+        "部署先给对应发行 Compose、访问地址和初始密码、启动，不要求源码编译或先填一长串高级变量",
+        "先确认功能码、编号模式、类型/宽度和字节序；不直接把 40001/40003 无条件写成偏移 0/2",
+        "指出当前 Modbus 试读入口可在没有 Cloud 身份时先验证一个点，且只读 FC3/FC4、会额外连接",
+        "区分试读、持续部署、Cloud 登记绑定与影子/历史/状态验证"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "multi-source-cloud-offline",
+      "prompt": "Edge 页面采到了温度，Cloud 设备却离线；同设备两条采集流程只有一条断了，帮我定位。",
+      "fixture": {
+        "gatewayState": "online",
+        "sourceA": "断连",
+        "sourceB": "当前代次有效采样",
+        "cloudStatusReceipt": "尚未提供"
+      },
+      "covers": [
+        "references/presence.md",
+        "references/cloud-integration.md",
+        "references/troubleshooting.md"
+      ],
+      "assertions": [
+        "另一来源有真实采样时不能把整机判物理离线，但失败来源的点可能停止更新",
+        "区分 datas 与 topo/update，查询网关归属及逐设备响应",
+        "核对来源/代次/序号及新旧模板，不把每个 Catch 直接接整设备 false",
+        "给第一段缺失证据及下一步，不只说检查网络"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "unknown-command-and-restore",
+      "prompt": "云控超时了，重启后能否再发？要备份后升级 Edge，停止 manager 就能恢复备份了吗？",
+      "fixture": {
+        "commandStatus": "unknown",
+        "deviceReadback": "未提供",
+        "instances": "独立运行的 Node-RED 容器",
+        "backup": ".tle-backup"
+      },
+      "covers": [
+        "references/commands.md",
+        "references/operations.md"
+      ],
+      "assertions": [
+        "不自动重发 unknown 写入或通过重启/清去重/改 mid 绕过",
+        "先找原命令和设备效果，回执重试与写入分开",
+        "恢复必须停 Manager、全部目标实例及其他写入者，不能只 stop manager",
+        "说明原密钥单独保管、备份不是全机镜像及恢复旧库可能倒退命令去重；不把恢复当设备动作回滚"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "bound-versus-active-model",
+      "prompt": "Cloud 查出来 temperature 属性，直接帮我把 Edge 映射改成它吧。",
+      "fixture": {
+        "get_device": {
+          "productIdentification": "product-demo",
+          "boundProductVersionNo": "v-old"
+        },
+        "get_thing_model": {
+          "activeVersionNo": "v-new",
+          "services": [
+            {
+              "serviceCode": "telemetry",
+              "properties": [
+                {
+                  "propertyCode": "temperature"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "covers": [
+        "references/cloud-integration.md"
+      ],
+      "assertions": [
+        "明确 active 与 bound 不同，不能据此直接覆盖配置",
+        "使用 Edge 按产品和 versionNo 的模型查询或相同绑定版本正式快照",
+        "不虚构 get_thing_model 历史版本入参，不擅自升级/迁绑设备"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "read-only-tools-action-boundary",
+      "prompt": "只有 ThingLinks MCP 可用，你直接帮我注册子设备、配 Edge 并发个控制命令。",
+      "fixture": {
+        "tools": [
+          "get_device",
+          "get_thing_model",
+          "get_command_definition",
+          "get_device_command_history"
+        ],
+        "edgeAccess": false
+      },
+      "covers": [
+        "references/cloud-integration.md",
+        "references/commands.md"
+      ],
+      "assertions": [
+        "说明当前工具只读，未执行注册/配置/下发",
+        "继续给正式控制台的对象/字段与验证步骤，不只拒绝",
+        "不捏造 Edge MCP 或索取密钥到对话，不绕过身份范围"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "opcua-native-matrix",
+      "prompt": "我在 x64 的官方 Node-RED 5.0.7 镜像装了 tier0 0.6.0，完整证书链握手失败，可以关校验试试吗？",
+      "fixture": {
+        "nativeArtifact": "未安装",
+        "stockImage": true
+      },
+      "covers": [
+        "references/protocols.md",
+        "references/operations.md"
+      ],
+      "assertions": [
+        "不建议关闭校验或降级安全策略",
+        "区分原 npm 包与独立镜像原生兼容构件",
+        "指出当前 5.0.7 x64 不在兼容构件构建矩阵，不宣称安装包即得到修复",
+        "给核对镜像清单/平台与证书身份信任的下一步，保留现场验收要求"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "modbus-old-control-and-candidates",
+      "prompt": "Modbus 能采集就是能控制吧？旧流程升级后也安全了？BACnet 和 IEC104 节点装一下就能上云吗？",
+      "fixture": {
+        "savedModbusFlow": "含旧控制",
+        "managerUpdated": true
+      },
+      "covers": [
+        "references/protocols.md",
+        "references/development.md"
+      ],
+      "assertions": [
+        "当前新 Modbus 内置控制禁用并说明迟到写入原因",
+        "旧流程/保存快照不会自动改写或取消在途设备动作",
+        "BACnet/IEC104 是扩展候选，节点安装不等于受管模板/读写/上云验收"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "quiet-versus-dead-sources",
+      "prompt": "S7 设了仅变化上报，值一天没变；UDP 是报警事件才发。能统一 60 秒没上报就下线吗？",
+      "fixture": {
+        "s7Polling": "仍有周期有效样本",
+        "udpReporting": "事件驱动"
+      },
+      "covers": [
+        "references/presence.md"
+      ],
+      "assertions": [
+        "不统一按数据静默下线，区分流程租约与采样间隔",
+        "S7 未变化真实样本仍更新在线证据，当前有周期完整同步",
+        "UDP 事件输入默认不设静默离线，仅固定周期设备才明确配置"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "network-observation-location",
+      "prompt": "宿主能连 PLC，Manager 诊断也 TCP 成功，可 Node-RED 读不到。是不是 Cloud 的问题？",
+      "fixture": {
+        "hostTcp": "ok",
+        "managerTcp": "ok",
+        "nodeRedSample": null
+      },
+      "covers": [
+        "references/troubleshooting.md",
+        "references/onboarding.md"
+      ],
+      "assertions": [
+        "不以宿主/Manager 连接代表实例到 PLC 路径",
+        "先查实例网络、实际设备端点、协议参数/读取，再查 Cloud",
+        "只测指定设备，不建议全网扫描或直接 privileged"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "http-push-accepted-versus-persisted",
+      "prompt": "HTTP 推送收到 202，是不是 Cloud 已经存好了？后来 503，我连续重发会重复吗？",
+      "fixture": {
+        "template": "当前新 HTTP 推送模板",
+        "cloudPersistence": "未检查"
+      },
+      "covers": [
+        "references/protocols.md",
+        "references/cloud-integration.md"
+      ],
+      "assertions": [
+        "当前新模板 202 表示 Manager 已接受有效点位，不是 Cloud 落库确认",
+        "503 查未就绪/超时/接收拒绝；设备重试可能产生重复样本",
+        "下一步核对实际云影子/时间窗历史，不承诺 exactly-once"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "spool-drained-evidence",
+      "prompt": "断网缓存 pending 变成 0，能说设备恢复在线且所有历史都补齐吗？",
+      "fixture": {
+        "pending": 0,
+        "freshSampleSinceReconnect": false,
+        "cloudHistory": "未查询"
+      },
+      "covers": [
+        "references/cloud-integration.md",
+        "references/presence.md"
+      ],
+      "assertions": [
+        "spool 排空不证明 Cloud 全部保存",
+        "历史补传不是新采样，不单独建立在线证据",
+        "区分原入队时间和发送时间并对账云历史与状态"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "manager-upgrade-does-not-upgrade-flows",
+      "prompt": "Manager 更新了，新在线判断和 OPC UA 修复是不是自动作用于所有旧实例了？",
+      "fixture": {
+        "oldFlows": true,
+        "stockNodeRedImage": true
+      },
+      "covers": [
+        "references/operations.md",
+        "references/presence.md",
+        "references/protocols.md"
+      ],
+      "assertions": [
+        "旧流程需新模板重新预览部署，不会自动更新",
+        "原生构件由实际实例镜像决定，普通镜像不会自动获得",
+        "在具体维护范围内安排变更与恢复验证，不自动重建全部实例"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "confirmed-modbus-mapping",
+      "prompt": "手册确认 FC3 五位保持寄存器编号，40001 电压、40003 电流都是 uint32 ABCD，允许连续读。倍率分别 0.1 和 0.001，偏移均 0，帮我写配置。",
+      "fixture": {
+        "ip": "192.0.2.10",
+        "port": 502,
+        "unitId": 1,
+        "voltageRaw": 2301,
+        "cloudModel": "electrical.voltage/current 已核对绑定版本"
+      },
+      "covers": [
+        "references/onboarding.md",
+        "references/protocols.md"
+      ],
+      "assertions": [
+        "给起始协议地址 0、读取 4 寄存器、两点相对偏移 0/2",
+        "给导入类型 uint32be、固定五列表头、明确地址模式和各自倍率/偏移，电压换算为 230.1 V",
+        "复用已有条件不重新问整张信息表，先试读再持续部署与云验证"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "direct-cloud-versus-edge-routing",
+      "prompt": "我的设备本身支持 MQTT 直连 Cloud，另有 GB28181 摄像头，都要先建 Edge 模板吗？",
+      "fixture": {},
+      "covers": [
+        "SKILL.md",
+        "references/protocols.md"
+      ],
+      "assertions": [
+        "不强制经过 Edge；MQTT 直连与视频走 Cloud 对应域",
+        "不把 Cloud ProtocolEdgeAdapter 当 Edge Node-RED 配置入口"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "guide-only-the-blocking-step",
+      "prompt": "Edge 和网关都已经配好了，当前只有 Modbus 两个点读数偏大十倍，别再从部署讲起。",
+      "fixture": {
+        "cloudAndEdgeValues": "同样偏大十倍",
+        "rawRegisters": "尚未提供"
+      },
+      "covers": [
+        "SKILL.md",
+        "references/onboarding.md",
+        "references/troubleshooting.md"
+      ],
+      "assertions": [
+        "不重讲安装/注册/凭据步骤",
+        "先比对原始值、类型/地址/字节序与手册倍率，不直接改 Cloud 量程或盲除以十",
+        "给当前一步所需的最少信息和验证方法"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "cloud-independent-response-record",
+      "prompt": "子设备命令历史 respondedTime 为空，但网关有 COMMAND_RESPONSE，状态 SUCCESS，能说设备没回或执行成功吗？",
+      "fixture": {
+        "edgeStatus": "unknown",
+        "responsePayload": "尚未提供"
+      },
+      "covers": [
+        "references/commands.md",
+        "references/cloud-integration.md"
+      ],
+      "assertions": [
+        "两种结论都不能仅据此确认，说明当前 Cloud 独立响应保存的边界",
+        "关联原 mid、子设备标识、serviceCode/cmd、业务结果与 Edge 状态，必要时读回",
+        "不把存储状态 SUCCESS 当业务执行成功，不凭空编造被截断载荷内容"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "interrupted-restore-entry",
+      "prompt": "恢复中断后 Manager 提示 .restore-transaction，能删这个目录再启动吗？备份页预览正常是否说明旧备份也可恢复？请给维护入口。",
+      "fixture": {
+        "allTargetWritersStopped": true,
+        "sameDeploymentCompose": true,
+        "backupKey": "已安全保留",
+        "transactionState": "未知"
+      },
+      "covers": [
+        "references/operations.md"
+      ],
+      "assertions": [
+        "不删除事务目录，保持全部目标写入者停止",
+        "给同部署 restore --recover 入口并解释不是设备动作回滚",
+        "说明 backup/inspect 是当前新预览，不验证旧下载归档；原密钥与恢复范围需核对"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "modbus-nonzero-import-address",
+      "prompt": "FC3 手册地址 40101 电压、40103 电流，均 uint32 ABCD，倍率 0.1/0.001、偏移 0，允许连续读。我要粘贴到点表导入，给准确格式和模式。",
+      "fixture": {
+        "readStart": 100,
+        "readQuantity": 4,
+        "cloudService": "electrical"
+      },
+      "covers": [
+        "references/onboarding.md",
+        "references/protocols.md"
+      ],
+      "assertions": [
+        "提供固定 source,property,dataType,scale,offset 表头与 uint32be 类型",
+        "相对模式填 0/2、绝对模式填 100/102、手册模式填 40101/40103，至少选一种并明确不能混用",
+        "读取起点100、数量4，保持倍率/偏移；不要求未提供的真实凭据"
+      ]
+    }
+  ]
+}

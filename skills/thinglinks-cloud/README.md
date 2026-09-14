@@ -2,6 +2,8 @@
 
 ThingLinks **云端业务平台**开发辅助 Agent Skill —— 覆盖系统基础、IoT 与流媒体三域，包括产品配置/部署命名空间、内部接口与多租户治理、设备上下行、物模型、规则脚本、GB28181 和运行时排障。
 
+设备通过 Edge 上云时，读取[云边协同](references/iot/edge-integration.md)核对身份、绑定版本、数据、状态与回执；现场接入、点表、实例和维护由 [`thinglinks-edge`](../thinglinks-edge/SKILL.md) 提供操作指引，Cloud 数据查询结合 `thinglinks-ai`。
+
 > 同家族：`thinglinks-util`(框架底座)、`thinglinks-web`(前端控制台)、`bifromq-plugin`(Broker 插件)。
 
 ## 结构
