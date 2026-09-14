@@ -37,7 +37,7 @@
 - **幂等三件套**:`CREATE STABLE IF NOT EXISTS`(重复建表无副作用)+ 设备 `SET` 改绑到同值幂等 + `DROP STABLE IF EXISTS`,重跑已成功的部分是 no-op,无需 per-item 断点续跑;
 - **扫描窗口**:RUNNING 回溯 24h(创建超 1h 仍 RUNNING 判永久卡死 → `markFailed` 不再重试);FAILED 只捞 1h 内新近失败;每状态单次限 100 条;
 - **记录级上限**:`rerun` 前查 `retryCount >= maxRetryCount` 则不再实际重跑(保持 FAILED,窗口老化后不再被捞 = 双重兜底),否则 `incrementRetryCount` 后重跑。`maxRetryCount` 取用户配置 **clamp 到 1~10**(`ProductVersionServiceImpl.resolvePublishMaxRetry`,缺省 3)。
-- 兜底已拆为**独立 XXL-Job** `flushProductVersionPublishRetryJobHandler`(facade `retryProductVersionPublish`),与缓存预热解耦,见 `build-run.md`。
+- 兜底已拆为**独立 XXL-Job** `flushProductVersionPublishRetryJobHandler`(facade `retryProductVersionPublish`),与缓存预热解耦,见 `../build-run.md`。
 
 ### 发布记录 `product_publish_record`(关键列)
 

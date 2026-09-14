@@ -7,6 +7,7 @@
 | Cloud 后端源码树 | broker / mqs / rule / link / public 业务模块 | `thinglinks-cloud`(本) |
 | Util 框架源码树 | `protocol-starter` / `groovy-engine-starter` / `thinglinks-core` | `thinglinks-util` |
 | Web 前端源码树 | Vue3 前端控制台 | `thinglinks-web` |
+| Job 调度中心源码树 | XXL-Job 调度中心(独立工程,执行器仍在 cloud) | `thinglinks-cloud`(本)的 `system/job-scheduling.md` |
 
 检出目录名不是产品契约；产品身份、版本与同步边界以 Cloud 根目录 `.thinglinks-product.env` 为准，操作见 `system/product-configuration.md`。
 
@@ -22,21 +23,26 @@
 | link | `LinkServerApplication` | 18782 | `thinglinks-link-server` |
 | gateway | `GatewayServerApplication` | 18760 | `thinglinks-gateway-server` |
 
-**依赖中间件**:Nacos(18848,配置/注册)、Kafka(上行事件流)、RocketMQ(桥接/告警/下行)、Redis(缓存/会话/指标)、TDengine(时序)、BifroMQ(MQTT broker,feign `…:8091`)、MySQL(元数据)。Nacos 上 `kafka.yml`/`rocketmq.yml`/`redis.yml`/`database.yml`。部署必须显式提供 `NACOS_NAMESPACE` / `SEATA_NAMESPACE`；它们不等于 MQ 命名空间。
+**依赖中间件**:Nacos(配置/注册。**端口两个值都会遇到**:Maven filter 四个 profile 的默认都是 `nacos.port=8848`,而 `docker-compose` 用环境变量覆盖成 `NACOS_PORT: 18848` —— 连不上时先看这次是怎么起的)、Kafka(上行事件流)、RocketMQ(桥接/告警/下行)、Redis(缓存/会话/指标)、TDengine(时序)、BifroMQ(MQTT broker,外部固定地址客户端 `spring.http.serviceclient.bifromq-api.base-url`,默认 `…:18091`)、MySQL(元数据)。Nacos 上 `kafka.yml`/`rocketmq.yml`/`redis.yml`/`database.yml`。部署必须显式提供 `NACOS_NAMESPACE` / `SEATA_NAMESPACE`；它们不等于 MQ 命名空间。
 
 **起法**:`cd docker && docker compose up -d` 一键拉全栈(`docker/docker-compose.yml`);或 IDE 跑各模块主类 + 指向本地 Nacos。`SPRING_PROFILES_ACTIVE=test`。
 
 ## 编译
 
 - 产品配置先跑 `scripts/tests/product-config-test.sh` + `scripts/product-config.sh check`；无 `.git` 的源码归档可执行后一个只读检查；
-- 后端 `mvn clean package -P test -DskipTests`(或 `-P prod`);整库校验用 IDEA MCP `build_project`;
+- 后端 `mvn clean package -P test`(或 `-P prod`);整库校验用 IDEA MCP `build_project`;
+- **单元测试现在默认执行。**`dependencies-parent` 里写死的全局 `skipTests=true` 已删除,
+  22 个模块为打开自己测试而写的反向配置也一并清掉,恢复了 Maven 标准语义 ——
+  以前 `-DskipTests` 是**失效**的(全局已经关了),现在它才真正生效。要跳过测试就显式加 `-DskipTests`;
+  连真实 Nacos / TDengine / 外网的那几个类(`CityParserTest` / `TDengineTest` / simple-sdk 示例)
+  已由 surefire `excludes` 排除,它们是手动工具不是单测;
 - **改了 util-pro 必须先 `mvn install` 到本地仓**,主库才拉得到新版本(否则用旧 jar);
 - 前端 `npx eslint --fix` + `npx eslint`。
 
 ## 跨仓库联动(改一处要同步)
 
 - `DeviceActionTypeEnum` 改 → bifromq-plugin-pro `EventTypeEnum` + DBA 字典 SQL + rule 规则 JSON + mqs README 第 7 节;
-- Kafka topic / `BridgeMessageEnvelope` 改 → 见 `references/extension-points.md`;
+- Kafka topic / `BridgeMessageEnvelope` 改 → 见 `references/iot/extension-points.md`;
 - util-pro 的 `LampJacksonModule` / `SnowflakeIdUtil` / `MqttTopicMatcher` 是全局行为,改动影响所有下游(谨慎,细节见 `thinglinks-util` skill)。
 
 ## XXL-Job 调度任务(`thinglinks-iot-executor` 的 `LinkJob`)

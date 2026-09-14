@@ -2,7 +2,8 @@ name: skill-lint
 
 # Validate skill structure on every push / PR:
 # frontmatter (name + trigger description), References Index integrity
-# (no dangling links, no orphan reference files), and any purity rules a skill
+# (no dangling links, no orphan reference files), relative and bare reference
+# paths, workflow `requires` tool names, and any purity rules a skill
 # declares in its lint.json.
 
 on:

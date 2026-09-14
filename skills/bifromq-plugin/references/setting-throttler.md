@@ -13,19 +13,25 @@ Start BifroMQ with:
 ```
 
 Without this flag, a setting cache miss uses BifroMQ's initial value instead of
-calling the plugin. The custom `DebugModeEnabled` value then has no effect, and
-`PING_REQ` events needed by the heartbeat pipeline are not collected.
+calling the plugin — every configured value below silently reverts to the kernel
+default (`false` / 10 / 100 / 200). The custom `DebugModeEnabled` value then has no
+effect, and `PING_REQ` events needed by the heartbeat pipeline are not collected.
 
 The current provider handles:
 
-| Setting | Source |
-| --- | --- |
-| `DebugModeEnabled` | `pluginConfig.debugModeEnabled`, fallback `true` |
-| `MaxTopicFiltersPerSub` | `pluginConfig.maxTopicFiltersPerSub` |
-| `MaxTopicFiltersPerInbox` | `pluginConfig.maxTopicFiltersPerInbox` |
-| other settings | `setting.current(tenantId)` |
+| Setting | Source | Plugin default | BifroMQ default |
+| --- | --- | --- | --- |
+| `DebugModeEnabled` | `pluginConfig.debugModeEnabled`, fallback `true` | `true` | `false` |
+| `MaxTopicFiltersPerSub` | `pluginConfig.maxTopicFiltersPerSub` | 100 | 10 |
+| `MaxTopicFiltersPerInbox` | `pluginConfig.maxTopicFiltersPerInbox` | 500 | 100 |
+| `MsgPubPerSec` | `pluginConfig.msgPubPerSec` | 1000 | 200 |
+| other settings | `setting.current(tenantId)` | — | — |
 
-Despite accepting `tenantId`, the three configured values are currently global.
+`MsgPubPerSec` caps how many messages a single MQTT client may publish per second.
+The plugin default of 1000 is the maximum BifroMQ 3.3.5 accepts — it is a ceiling,
+not a headroom value, so do not propose raising it.
+
+Despite accepting `tenantId`, all four configured values are currently global.
 Do not describe them as tenant-specific until a real per-tenant lookup is added
 without blocking the callback.
 

@@ -10,8 +10,15 @@ description: >
 
 # ThingLinks BifroMQ Plugin
 
-Four Java 17 PF4J plugins target BifroMQ 3.3.5. Auth, event, and setting code uses
-`com.baidu.bifromq.*`; do not copy 4.x `org.apache.bifromq.*` examples here.
+Four PF4J plugins target BifroMQ 3.3.5. Auth, event, and setting code uses
+`com.baidu.bifromq.*`; do not copy 4.x `org.apache.bifromq.*` examples here. Source comments
+that mention `org.apache.bifromq` are 4.0 upgrade notes, not current imports.
+
+**The Java target differs by edition and is not a detail you can assume.** Read
+`THINGLINKS_JAVA_VERSION` from `.thinglinks-product.env`: the Enterprise repo
+(`bifromq-plugin-pro`) is on **JDK 25** with `maven.compiler.release=25` and a Maven
+enforcer that fails the build on anything lower; the Community monorepo copy is on JDK 17.
+Change it through `scripts/product-config.sh set-java-version <major>`, never by editing POMs.
 
 ## Components
 
@@ -63,3 +70,9 @@ Four Java 17 PF4J plugins target BifroMQ 3.3.5. Auth, event, and setting code us
 
 `assets/standalone-register.yml` contains the four provider FQNs and the required
 JVM flag without deployment credentials.
+
+---
+
+> 📌 **Last verified**: 2026-08-22, against `bifromq-plugin-pro`.
+> Versions, the Java target and BifroMQ SPI packages come from `.thinglinks-product.env` and the
+> parent POM — check them there, and note the Enterprise and Community lines differ.

@@ -79,7 +79,7 @@ def clean = { Map m -> m.findAll { k, v -> v != null } }
 
 ## 最小骨架
 
-见 `assets/rule-script/01-data-report.groovy`。完整示例与信封字段见 `references/protocol-envelope.md`;排查见 `references/troubleshooting.md`。
+见 `assets/rule-script/01-data-report.groovy`。完整示例与信封字段见 `protocol-envelope.md`;排查见 `troubleshooting.md`。
 
 ## 自检清单
 

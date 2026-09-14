@@ -7,7 +7,7 @@
 结构化、按需加载的知识包,让任意 AI Agent(Claude Code · Codex · Cursor)秒变 ThingLinks 专家。
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Skills](https://img.shields.io/badge/skills-6-brightgreen.svg)](#-技能列表)
+[![Skills](https://img.shields.io/badge/skills-7-brightgreen.svg)](#-技能列表)
 [![Powered by skills.sh](https://img.shields.io/badge/powered%20by-skills.sh-7c3aed.svg)](https://skills.sh/)
 [![ThingLinks](https://img.shields.io/badge/platform-ThingLinks-0960bd.svg)](https://github.com/mqttsnet/thinglinks)
 
@@ -27,7 +27,8 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 
 | Skill | 对应仓库 | 帮你做什么 |
 | --- | --- | --- |
-| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云平台 —— **系统基础** / **IoT** / **流媒体** | **三域。** *IoT:* 规则脚本、协议信封、TopicHandler、下行、物模型、TDengine+影子、ACL、WS 广播。*系统基础:* WebFlux 网关、Sa-Token、内部接口、DATASOURCE_COLUMN 多租户、产品清单/MQ 命名空间、Nacos/Seata 部署。*流媒体:* GB28181(ZLMediaKit)。 |
+| [`thinglinks-cloud`](./skills/thinglinks-cloud/) | 云平台 —— **系统基础** / **IoT** / **流媒体** | **三域。** *IoT:* 规则脚本、协议信封、TopicHandler、下行、物模型、TDengine+影子、ACL、WS 广播。*系统基础:* WebFlux 网关、Sa-Token、内部接口、服务间调用(按发行分 HTTP Interface / Feign)、DATASOURCE_COLUMN 多租户、产品清单/MQ 命名空间、Nacos/Seata 部署、XXL-Job 定时任务。*流媒体:* GB28181(ZLMediaKit)。 |
+| [`thinglinks-edge`](./skills/thinglinks-edge/) | 独立 Edge 产品 —— Manager + Node-RED | **设备接入与现场维护。** 协议选择、试读和点表配置、物模型映射、云边数据/在线状态/命令排障、实例与组件管理、升级和备份恢复。 |
 | [`thinglinks-util`](./skills/thinglinks-util/) | 框架底座 —— 协议 / 脚本 / 缓存 / 消息 / core | 协议**编解码**、Groovy 执行与安全边界、typed **cache-aside 与锁**、Kafka/RocketMQ、桥接 SPI、敏感字段加密、ID/Jackson/topic/HLC 工具和构建发行规则。 |
 | [`thinglinks-web`](./skills/thinglinks-web/) | 前端控制台 —— Vue3 + Vben | IoT 页面、defHttp API、路由权限、共享组件、规则脚本调试、规则联动通知、产品清单/构建门禁、浏览器配置安全、i18n 与开发准则。 |
 | [`bifromq-plugin`](./skills/bifromq-plugin/) | BifroMQ broker 插件 —— `bifromq-plugin-pro` | 认证与 ACL、Kafka 事件契约、setting/限流真实边界、运行时配置与日志安全、兼容版本、打包和部署。 |
@@ -41,6 +42,7 @@ Agent Skills 是结构化的知识包,为 AI Agent 提供某领域**按需加载
 ```bash
 # 全局(-g)所有项目可用;去掉 -g 仅当前项目
 npx skills add mqttsnet/thinglinks-skills@thinglinks-cloud -g
+npx skills add mqttsnet/thinglinks-skills@thinglinks-edge -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-util  -g
 npx skills add mqttsnet/thinglinks-skills@thinglinks-web   -g
 npx skills add mqttsnet/thinglinks-skills@bifromq-plugin   -g
@@ -60,12 +62,13 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 └── agents/openai.yaml# 跨工具接口(Codex / OpenAI)
 ```
 
-- `thinglinks-cloud` —— 28 篇 references(**`system/` · `security/` · `iot/` · `video/`**,含产品配置、内部接口治理、运行时调试、设备接入/测试)+ 3 个 Groovy 骨架 + Mermaid 架构图
-- `thinglinks-util` —— 9 篇 references(协议 / Groovy / 缓存 / 加密 / core / Kafka / RocketMQ / 桥接 / 构建发行)
+- `thinglinks-cloud` —— 32 篇 references(**`system/` · `security/` · `iot/` · `video/`**,含服务间调用、产品配置、内部接口治理、定时任务、运行时调试、设备接入/测试)+ 3 个 Groovy 骨架 + Mermaid 架构图
+- `thinglinks-edge` —— 8 篇 references（设备接入 / 协议配置 / 云边诊断 / 在线状态 / 命令 / 部署维护 / 故障定位 / 开发入口）+ 接入信息表与行为用例
+- `thinglinks-util` —— 11 篇 references(协议 / Groovy / 缓存 / 加密 / core / Kafka / RocketMQ / 桥接 / cloud-starter / 扩展库引擎 / 构建发行)
 - `thinglinks-web` —— 9 篇 references(结构 / API / 路由权限 / 开发准则 / 组件 / 页面地图 / 脚本调试 / 联动通知 / 产品构建安全)
 - `bifromq-plugin` —— 6 篇 references(认证 ACL / 事件 / setting 与限流 / 部署 / 运行时安全 / 构建发行)
 - `thinglinks-workspace` —— 1 篇 reference(`security-baseline` 安全硬性指标)
-- `thinglinks-ai` —— 41 篇 reference(按域的工具调度、安全边界、场景工作流、服务端建设规则)+ 对账脚本
+- `thinglinks-ai` —— 42 篇 reference(按域的工具调度、安全边界、场景工作流、服务端建设规则)+ 工具对账与用例自检脚本
 
 ## 🏷️ 命名规范
 
@@ -73,10 +76,13 @@ npx skills add mqttsnet/thinglinks-skills@thinglinks-ai        -g
 
 | Skill | 对应仓库 |
 | --- | --- |
-| `thinglinks-cloud` | 云端业务平台 —— `broker` / `mqs` / `rule` / `link` / `public` |
+| `thinglinks-cloud` | 云端业务平台 —— `broker` / `mqs` / `rule` / `link` / `public` / `ai`,以及拆成独立工程的 XXL-Job 调度中心 |
+| `thinglinks-edge` | 独立边缘产品 —— 现场设备接入、Node-RED 实例、Cloud 对接与维护 |
 | `thinglinks-util` | 框架底座 —— 协议 / 脚本 / 缓存 / 消息 / core |
 | `thinglinks-web` | 前端控制台 —— Vue3 |
 | `bifromq-plugin` | BifroMQ broker 插件 —— `bifromq-plugin-pro` |
+| `thinglinks-ai` | AI 服务 —— MCP 调度、回答边界,以及 MCP 服务本身 |
+| `thinglinks-workspace` | 不对应单个仓 —— 两条产品线的仓库地图 |
 
 ## 🔗 相关项目
 

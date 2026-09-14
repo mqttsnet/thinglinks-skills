@@ -7,8 +7,8 @@
 | 层 | 选择 | 说明 |
 | --- | --- | --- |
 | 动作级 | biz `DeviceEventProcessor`(放 `event/processor/`) | 按 actionType(PUBLISH/CONNECT/CLOSE…),一个 actionType 一个,**不改 dispatcher** |
-| topic 级 | biz `TopicHandler`(放 `uplink/handler/`,可继承 `AbstractMessageHandler`) | PUBLISH 内按 topic 正则路由(厂商私有上报链路);见 `references/topic-handler.md` |
-| 无代码级 | 规则脚本前置转换 | 把私有报文翻译成标准 datas;见 `references/rule-script.md` |
+| topic 级 | biz `TopicHandler`(放 `uplink/handler/`,可继承 `AbstractMessageHandler`) | PUBLISH 内按 topic 正则路由(厂商私有上报链路);见 `topic-handler.md` |
+| 无代码级 | 规则脚本前置转换 | 把私有报文翻译成标准 datas;见 `rule-script.md` |
 
 运行链路:`DevicePublishProcessor → InboundScriptTransformer.resolveEventSource(规则脚本/未命中透传) → TopicHandlerFactory.findMatchingHandler(topic) → handler.handle()`。规则脚本 opt-in:未命中即原样透传,`TopicHandler` 照常按原 topic 命中。
 

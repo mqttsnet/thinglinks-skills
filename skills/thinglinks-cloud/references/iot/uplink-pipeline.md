@@ -47,4 +47,4 @@
 
 `assemble(deviceVO, productVO, productModel, topic, body, bodyHex, ...)` → 注入 originTopic/originBody/originBodyHex/clientId/deviceIdentification/productIdentification + device.* + product.* + productModel + config.*;`log`(ScriptLogCollector)由 rule 注入。版本解析:`device.boundProductVersionNo ?: product.activeVersionNo` → `LinkCacheDataHelper.resolveProductModelByVersionNo`。
 
-> 阶段顺序/类名随版本演进 —— 改链路前核对 `com.mqttsnet.thinglinks.bus.*` / `mqs.bus.*`。扩展见 `references/extension-points.md`。
+> 阶段顺序/类名随版本演进 —— 改链路前核对 `com.mqttsnet.thinglinks.bus.*` / `mqs.bus.*`。扩展见 `extension-points.md`。

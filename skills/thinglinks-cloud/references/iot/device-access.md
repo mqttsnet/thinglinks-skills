@@ -1,6 +1,6 @@
 # 设备接入 + 上行(连接 / 鉴权 / ACL / 上行帧 / 凭证)
 
-设备怎么连上平台、怎么上报。**下发 / 校验**见 `testing.md`。鉴权/ACL 是 broker→cloud 的 Feign 面(`/anyTenant/deviceOpen/**`,经网关加 `/link` 前缀,无 token,租户从 clientId 取)。
+设备怎么连上平台、怎么上报。**下发 / 校验**见 `testing.md`。鉴权/ACL 是 broker→cloud 的 HTTP 面(`/anyTenant/deviceOpen/**`,经网关加 `/link` 前缀,无 token,租户从 clientId 取)。
 
 ## 凭证派生(设备新增时)
 
@@ -39,8 +39,14 @@
 | `/{v}/devices/{id}/topo/{add,update,delete,query}` | 子设备增删改查 Handler |
 | `/{v}/devices/{id}/topo/{secretKey,timeSyncRequest}` | SecretKey / TimeSync |
 | `/{v}/devices/{id}/topo/ota{Pull,Report,ReadResponse,CommandResponse}` | OTA 各 Handler |
+| `/{v}/devices/{id}/model/query` | **ModelQueryHandler**(设备按产品标识 + 版本序号拉取物模型完整定义,应答发到 `/model/queryResponse`) |
 | `/{v}/devices/{id}/chatgpt/request` | ChatgptRequestHandler |
 | 不匹配 | DefaultHandler(可配 `topicPattern=#` 的规则脚本兜底) |
+
+> `model/query` 挂在 `model/` 而不是 `topo/` 下是有理由的:`topo/` 那一族是拓扑、密钥、时间同步、OTA
+> (functionType 1/2/4/5),而 functionType 3「物模型通信」(`datas` / `command` / `commandResponse`)
+> 全都不在 `topo/` 下,`model/query` 与它们同族。**与 `topo/query` 的分工**:后者返回设备档案,
+> 前者只返回产品物模型,不含任何设备信息。
 
 **`/datas` 报文 = 信封**(`ProtocolDataMessageDTO`):
 ```json

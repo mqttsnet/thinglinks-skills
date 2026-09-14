@@ -3,10 +3,14 @@ name: thinglinks-util
 description: >
   Use when working on ThingLinks framework foundation modules in thinglinks-util-pro:
   protocol envelopes, Groovy execution, cache and locks, Kafka or RocketMQ,
-  databridge, sensitive-field encryption, shared core utilities, or Maven
-  version/build/release maintenance. Trigger especially for changes with
+  databridge, sensitive-field encryption, shared core utilities, the cloud-starter
+  service-call foundation (Spring HTTP Interface wiring, Apache HttpClient 5 connection
+  pool, context header propagation, grayscale load balancing — OpenFeign was removed in
+  1.0.9), the tds-starter and its extend-database engines (TDengine / ClickHouse / IoTDB),
+  or Maven version/build/release maintenance. Trigger especially for changes with
   cross-service serialization, security, context propagation, ordering, or
-  compatibility impact.
+  compatibility impact, and whenever someone asks 为什么 header 没透传 / 连接池参数不生效 /
+  切时序引擎 / IoTDB 写不进去 / util 版本升到多少了.
 ---
 
 # ThingLinks Util
@@ -24,9 +28,17 @@ description: >
 | `thinglinks-kafka-starter` | 带 key 发送、事务 opt-in、DLT 消费 |
 | `thinglinks-rocketmq-starter` | 发送封装、LocalMap 上下文透传、租户感知消费 |
 | `thinglinks-databridge-starter` | Sink/Source/Serializer SPI 与连接复用 |
+| `thinglinks-cloud-starter` | 服务间调用底座:HTTP Interface 装配、连接池、header 透传、灰度 LB |
+| `thinglinks-tds-starter` / `thinglinks-databases` | 时序 SQL 构造与类型映射;扩展库三引擎(TDengine / ClickHouse / IoTDB) |
 | `thinglinks-core` | ID、Jackson、topic、HLC、敏感字段加密、通用工具 |
 
+上表只是**最常改的几个**;仓内共 35 个 Maven 模块,没列到不等于不存在,以 `pom.xml` 的 `<modules>` 为准。
+
 协议信封的业务结构见 `thinglinks-cloud`；本 skill 关注底座实现与跨服务契约。
+
+> **版本线**:util 独立发版,当前 `1.0.9`(已适配 Spring Boot 4)。
+> 消费方各自在 `.thinglinks-product.env` 里用 `THINGLINKS_UTIL_VERSION` 锚定,**两条产品线并不一致** ——
+> 社区版组件还在 1.0.8.x。回答「用的哪个 util 版本」必须先问清是哪个组件。
 
 ## 工作规则
 
@@ -45,6 +57,9 @@ description: >
 - AES 使用 CBC + PKCS5Padding、HEX；key 为 16/24/32 字节，IV 固定 16 字节。
 - Groovy 限制是同 JVM 内的纵深防御，不是执行不可信脚本的强隔离沙箱。
 - `RocketmqTemplate.getRaw()` 不自动注入 LocalMap header；需要上下文时使用封装 API 或先构造带 header 的消息。
+- 1.0.9 起 cloud-starter **不再提供 OpenFeign 装配**(Feign / Sentinel-Feign 相关类已删除),服务间调用改用 Spring HTTP Interface。
+- 连接池默认 `concurrency-policy=LAX`,此时 `max-connections` **不生效**,真正限流的是 `max-connections-per-route`。
+- IoTDB 的时间精度是 server 级配置且初始化后不可改;平台写纳秒时间戳,**部署前必须先把精度设为 ns**,否则报 `701 The timestamp is unexpectedly large`。
 
 ## References Index
 
@@ -58,9 +73,16 @@ description: >
 | [references/kafka-starter.md](references/kafka-starter.md) | 生产消费装配、带 key 发送、事务与 DLT | 发/消费 Kafka 消息 |
 | [references/rocketmq-starter.md](references/rocketmq-starter.md) | opt-in 装配、上下文透传、租户消费 | 发/消费 RocketMQ 消息 |
 | [references/databridge-starter.md](references/databridge-starter.md) | 桥接 SPI、自动发现与扩展 | 新增桥接目标或来源 |
+| [references/cloud-starter.md](references/cloud-starter.md) | HTTP Interface 装配、header 透传清单、HttpClient 5 连接池(LAX/STRICT 坑)、两个 RestTemplate、灰度 LB;OpenFeign 移除范围 | 改服务间调用底座、排查 header 没透传/连接池参数不生效 |
+| [references/tds-extend-db.md](references/tds-extend-db.md) | 扩展库三引擎、按引擎分开的建库选项、IoTDB 精度硬前提、`DbPlusUtil` URL 识别、类型映射与标签列名 | 切时序引擎、加数据类型、排查新建租户失败 |
 | [references/build-release.md](references/build-release.md) | 产品配置、版本同步、构建与发布边界 | 改版本、安装上游工件、准备发布 |
 
 ## 相关 skill
 
 - `thinglinks-cloud`：协议、规则、缓存、消息等底座能力的业务落地。
 - `bifromq-plugin`：MQTT ACL topic 匹配与 broker 事件因果序。
+
+---
+
+> 📌 **最后核对**:2026-08-22,对照 `thinglinks-util-pro` 当前检出(1.0.9 / Spring Boot 4)。
+> 模块清单以根 `pom.xml` 的 `<modules>` 为准;消费方用的是哪个 util 版本看该组件自己的产品清单。
