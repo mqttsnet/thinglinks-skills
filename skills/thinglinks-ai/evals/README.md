@@ -6,7 +6,7 @@
 用例来源是真机调用中实际观察到的返回形状 —— 这几种的共同点是:
 **不带本 skill 时给出的错误答案读起来完全合理**,用户没有办法自行察觉。
 
-当前 **30 条用例、113 项断言**,`boundaries/` 与 `workflows/` 共 22 篇每篇至少一条。
+当前 **33 条用例、124 项断言**,`boundaries/` 与 `workflows/` 共 22 篇每篇至少一条。
 
 ## 怎么用
 
@@ -37,11 +37,11 @@ python3 scripts/check_evals.py
 | boundaries/identity-injection | 24 |
 | boundaries/data-visibility | 23 |
 | boundaries/unanswerable | 5, 9, 17, 19, 22 |
-| workflows/answering-contract | 3 |
+| workflows/answering-contract | 3, 31, 32 |
 | workflows/evidence-rules | 20 |
 | workflows/iot/device-offline | 25 |
 | workflows/iot/data-not-updating | 1 |
-| workflows/iot/never-reported | 4 |
+| workflows/iot/never-reported | 4, 33 |
 | workflows/iot/shadow-analysis | 6 |
 | workflows/iot/baseline-profile | 29 |
 | workflows/iot/anomaly-cross-check | 28 |
@@ -69,4 +69,4 @@ python3 scripts/check_evals.py
 服务端已经逐次打了 `[ai-mcp] call tool=` 与 `[ai-mcp] done tool=` 日志,是现成的证据源 ——
 补这一类时不必再改服务端。
 
-在补上之前,不要把当前这 30 条说成「覆盖完整」。
+在补上之前,不要把当前这 33 条说成「覆盖完整」。

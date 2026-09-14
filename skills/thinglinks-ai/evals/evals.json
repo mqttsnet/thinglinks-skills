@@ -57,10 +57,10 @@
       "fixture": {
         "get_metric_stats": {"isError": true, "message": "时序区间统计失败: 时序表 T-0001 不存在(库 DB-0001):该表尚未创建,或从未写入过数据"}
       },
-      "expected_output": "把它当作结论:该设备从未有数据落库,并给出接入侧的排查方向",
+      "expected_output": "指出当前查询对应的历史数据尚不存在，核对设备绑定版本和影子，并给出接入侧排查方向",
       "assertions": [
         "没有把这条报错转述成「查询失败」或「工具有问题」",
-        "指出这台设备从未有数据落库",
+        "指出当前查询对应的历史数据尚不存在，保留设备绑定版本范围",
         "没有建议换一个时间范围重试"
       ]
     },
@@ -495,6 +495,55 @@
         "给出的排查顺序把配置不匹配与链路问题排在「设备本身」之前",
         "没有一上来就建议更换、重启或返修设备",
         "在还没有设备标识时没有给出任何具体的故障结论"
+      ]
+    },
+    {
+      "id": 31,
+      "name": "no-field-names-in-answer",
+      "covers": "workflows/answering-contract",
+      "prompt": "我现在有几台设备?",
+      "fixture": {
+        "list_devices": {"matched": 4, "truncated": false, "total": 4, "devices": ["占位 ×4"]}
+      },
+      "expected_output": "共 4 台设备。不出现字段名,也不提没有触发的截断标记",
+      "assertions": [
+        "回答里没有出现 matched、truncated、total 这些字段名",
+        "没有提「结果未被截断」这类没有触发的标记——对用户是零信息",
+        "直接给出 4 台这个数"
+      ]
+    },
+    {
+      "id": 32,
+      "name": "truncated-in-plain-words",
+      "covers": "workflows/answering-contract",
+      "prompt": "把我们的设备列一下",
+      "fixture": {
+        "list_devices": {"matched": 137, "truncated": true, "returned": 20}
+      },
+      "expected_output": "说清只列了前 20 台、符合条件的共 137 台,且用人话而不是字段名",
+      "assertions": [
+        "数量用了 137 而不是 20",
+        "说明了清单只列出其中一部分",
+        "回答里没有出现 truncated 或 matched 这些字段名"
+      ]
+    },
+    {
+      "id": 33,
+      "name": "downstream-error-not-echoed",
+      "covers": "workflows/iot/never-reported",
+      "prompt": "这台设备上周的温度平均值是多少?",
+      "fixture": {
+        "get_metric_stats": {"isError": true, "message": "时序区间统计失败: 时序表 T-0001 不存在(库 DB-0001):该表尚未创建,或从未写入过数据"},
+        "get_device": {"deviceIdentification": "device-example", "boundProductVersionNo": "v2"},
+        "known_history": "该设备旧版本 v1 曾有数据，当前查询使用 v2"
+      },
+      "expected_output": "说明当前绑定的 v2 版本下还没有温度历史数据，无法计算这次平均值；不扩大成设备所有版本从未上报，也不出现表名与库名",
+      "assertions": [
+        "回答里没有出现表名 T-0001 或库名 DB-0001",
+        "没有出现「时序表」这个存储层说法",
+        "给出当前绑定版本下尚无历史数据的结论，说明无法计算本次平均值",
+        "没有把当前版本缺少历史数据扩大成设备所有版本从未上报",
+        "没有把它说成「查询失败」而丢掉结论"
       ]
     }
   ]
